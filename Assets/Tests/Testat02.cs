@@ -136,6 +136,7 @@ namespace Tests
             Assert.AreEqual(Vector3.zero, avatar.transform.position, $"Must not move avatar when no input is happening.");
 
             Array.ForEach(move.keys, key => input.Press(key));
+            InputSystem.Update();
             yield return new WaitForFixedUpdate();
             var actual = avatar.transform.position;
             Assert.AreEqual(Math.Sign(target.x), Math.Sign(actual.x), $"With input {move}, avatar's x should've moved towards {target.x}");
@@ -149,6 +150,7 @@ namespace Tests
             actual = avatar.transform.position;
 
             Array.ForEach(move.keys, key => input.Release(key));
+            InputSystem.Update();
 
             yield return new WaitForFixedUpdate();
 
@@ -200,6 +202,7 @@ namespace Tests
             yield return new WaitForFixedUpdate();
 
             Array.ForEach(move.keys, key => input.Press(key));
+            InputSystem.Update();
 
             for (int i = 0; i < frames; i++)
             {
@@ -211,6 +214,7 @@ namespace Tests
             Assert.IsTrue(TestUtils.Approximately(target, actual), $"With input {keyName}, speed {speed}m/s and waiting {frames} FixedUpdate frames, avatar should have arrived at position {target}, but was {actual}");
 
             Array.ForEach(move.keys, key => input.Release(key));
+            InputSystem.Update();
         }
     }
 }
