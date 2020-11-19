@@ -33,7 +33,7 @@ namespace Tests
         private const string AVATAR_NAME = "Avatar";
         private const string AVATAR_SPEED_FIELD = "movementSpeed";
 
-        public static readonly Regex EMAIL_PATTERN = new Regex(@"^[\w@.]+uni-bayreuth\.de$");
+        private static readonly Regex EMAIL_PATTERN = new Regex(@"^[\w@.]+uni-bayreuth\.de$");
         private static readonly string[] GIT_FILES = new[] { "./.gitignore", "./.gitattributes" };
         private static readonly float[] AVATAR_SPEED_VALUES = new[] { 0, 5f };
         private static readonly int[] AVATAR_SPEED_DURATIONS = new[] { 0, 2, 4 };
