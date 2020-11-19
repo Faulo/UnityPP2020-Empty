@@ -8,4 +8,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/HelloWorld.unity
     guid: 92f9538e99e99a34d94089d18a9b3725
+  - enabled: 1
+    path: Assets/Scenes/InputTest.unity
+    guid: 61ba7b244699c0947adcd8b3ebe92b3e
   m_configObjects: {}
