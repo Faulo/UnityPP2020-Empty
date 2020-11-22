@@ -7,12 +7,11 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class Testat03
+    public class Testat03 : TestSuite
     {
         [System.Serializable]
         public class Move
@@ -198,8 +197,8 @@ namespace Tests
             GameObject platformPrefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
             GameObject avatarPrefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
 
-            AsyncOperation operation = SceneManager.LoadSceneAsync(SCENE_NAME);
-            yield return new WaitUntil(() => operation.isDone);
+            LoadTestScene(SCENE_NAME);
+            yield return new WaitForFixedUpdate();
             var pairs = FindPrefabInstances().ToArray();
 
             var avatars = pairs
@@ -238,7 +237,7 @@ namespace Tests
 
         private IEnumerable<(string, GameObject)> FindPrefabInstances()
         {
-            var instances = SceneManager.GetActiveScene()
+            var instances = currentScene
                 .GetRootGameObjects()
                 .SelectMany(obj => obj.GetComponentsInChildren<Transform>())
                 .Select(t => t.gameObject);
@@ -253,7 +252,7 @@ namespace Tests
         {
 
             GameObject prefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
-            GameObject instance = Object.Instantiate(prefab, position, Quaternion.identity);
+            GameObject instance = InstantiateGameObject(prefab, position, Quaternion.identity);
             var avatar = new AvatarBridge(instance);
             avatar.rigidbody.mass = 1;
             avatar.rigidbody.drag = 0;
@@ -264,7 +263,7 @@ namespace Tests
         {
 
             GameObject prefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
-            GameObject instance = Object.Instantiate(prefab, position, Quaternion.identity);
+            GameObject instance = InstantiateGameObject(prefab, position, Quaternion.identity);
             return new PlatformBridge(instance);
         }
     }

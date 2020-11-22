@@ -9,12 +9,11 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class Testat02
+    public class Testat02 : TestSuite
     {
         [Serializable]
         public class Move
@@ -109,7 +108,7 @@ namespace Tests
 
         private IEnumerable<Transform> FindAvatars()
         {
-            return SceneManager.GetActiveScene()
+            return currentScene
                 .GetRootGameObjects()
                 .SelectMany(obj => obj.GetComponentsInChildren<Transform>())
                 .Where(transform => transform.gameObject.name == AVATAR_NAME);
@@ -117,8 +116,8 @@ namespace Tests
         [UnityTest]
         public IEnumerator TestAvatarExists()
         {
-            AsyncOperation operation = SceneManager.LoadSceneAsync(SCENE_NAME);
-            yield return new WaitUntil(() => operation.isDone);
+            LoadTestScene(SCENE_NAME);
+            yield return new WaitForFixedUpdate();
             var avatars = FindAvatars();
 
             Assert.AreEqual(1, avatars.Count(), $"There must be exactly 1 GameObject with the name of '{AVATAR_NAME}' in scene '{SCENE_NAME}'!");
@@ -126,8 +125,8 @@ namespace Tests
         [UnityTest]
         public IEnumerator TestAvatarInput([ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move)
         {
-            AsyncOperation operation = SceneManager.LoadSceneAsync(SCENE_NAME);
-            yield return new WaitUntil(() => operation.isDone);
+            LoadTestScene(SCENE_NAME);
+            yield return new WaitForFixedUpdate();
             var avatar = FindAvatars().First();
 
             var target = move.direction;
@@ -173,8 +172,8 @@ namespace Tests
         [UnityTest]
         public IEnumerator TestAvatarSpeedFieldExists()
         {
-            AsyncOperation operation = SceneManager.LoadSceneAsync(SCENE_NAME);
-            yield return new WaitUntil(() => operation.isDone);
+            LoadTestScene(SCENE_NAME);
+            yield return new WaitForFixedUpdate();
             var avatar = FindAvatars().First();
             var speedFields = FindSpeedFields(avatar);
 
@@ -186,8 +185,8 @@ namespace Tests
             [ValueSource(nameof(AVATAR_SPEED_VALUES))] float speed,
             [ValueSource(nameof(AVATAR_SPEED_DURATIONS))] int frames)
         {
-            AsyncOperation operation = SceneManager.LoadSceneAsync(SCENE_NAME);
-            yield return new WaitUntil(() => operation.isDone);
+            LoadTestScene(SCENE_NAME);
+            yield return new WaitForFixedUpdate();
             var avatar = FindAvatars().First();
             var (speedComponent, speedField) = FindSpeedFields(avatar).First();
 

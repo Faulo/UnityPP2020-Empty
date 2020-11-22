@@ -3,12 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Tests
 {
-    public class Testat01
+    public class Testat01 : TestSuite
     {
         private const string UNITY_VERSION = "2019.4.12f1";
         private const string GIT_PATH = "./.git";
@@ -45,9 +44,9 @@ namespace Tests
                     messages.Add(condition);
                 }
             }
-            AsyncOperation operation = SceneManager.LoadSceneAsync(SCENE_NAME);
             Application.logMessageReceived += listener;
-            yield return new WaitUntil(() => operation.isDone);
+            LoadTestScene(SCENE_NAME);
+            yield return new WaitForFixedUpdate();
             Application.logMessageReceived -= listener;
 
             CollectionAssert.AreEqual(new[] { DEBUG_MESSAGE }, messages);
