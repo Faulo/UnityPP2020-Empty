@@ -215,7 +215,7 @@ namespace Tests
                 SCENE_PLATFORM_COUNT, platforms.Length, $"Scene {SCENE_NAME} must have exactly {SCENE_PLATFORM_COUNT} instance(s) of prefab {platformPrefab}!");
 
             var avatar = new AvatarBridge(avatars[0]);
-            Assert.IsFalse(avatar.isGrounded, $"At scene start, avatar should be airborne!");
+
             float timeout = Time.time + SCENE_TIMEOUT;
             yield return new WaitUntil(() => avatar.isGrounded || Time.time > timeout);
             Assert.IsTrue(avatar.isGrounded, $"After waiting {SCENE_TIMEOUT}s, avatar should be grounded!");
