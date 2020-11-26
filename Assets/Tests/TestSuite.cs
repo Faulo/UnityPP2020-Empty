@@ -1,5 +1,8 @@
-﻿using System.Collections;
+﻿using NUnit.Framework;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -46,6 +49,13 @@ namespace Tests
             SceneManager.LoadScene(name, LoadSceneMode.Additive);
             loadedScene = SceneManager.GetSceneAt(sceneIndex);
             return loadedScene;
+        }
+        protected T LoadAsset<T>(string path) where T : Object
+        {
+            FileAssert.Exists(new FileInfo(path));
+            var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+            Assert.IsNotNull(asset, $"Could not load asset of type {typeof(T).Name} at path {path}!");
+            return asset;
         }
 
         private readonly Queue<GameObject> loadedObjects = new Queue<GameObject>();

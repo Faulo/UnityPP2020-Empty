@@ -37,5 +37,11 @@ namespace Tests
             Assert.AreEqual(1, components.Length, $"There must be exactly 1 component of type of type '{typeof(T)}' in GameObject '{gameObject}'!");
             return components[0];
         }
+        protected T FindComponentInChildren<T>() where T : Component
+        {
+            var components = gameObject.GetComponentsInChildren<T>();
+            Assert.AreEqual(1, components.Length, $"There must be exactly 1 component of type of type '{typeof(T)}' in GameObject '{gameObject}' (or its children)!");
+            return components[0];
+        }
     }
 }
