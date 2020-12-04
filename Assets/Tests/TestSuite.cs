@@ -38,7 +38,7 @@ namespace Tests
             if (loadedScene.IsValid())
             {
                 var operation = SceneManager.UnloadSceneAsync(loadedScene);
-                yield return new WaitUntil(() => operation.isDone);
+                yield return new WaitUntil(() => operation == null || operation.isDone);
                 loadedScene = default;
             }
         }

@@ -33,7 +33,7 @@ namespace Tests
             {
                 var fields = component
                     .GetType()
-                    .GetFields()
+                    .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                     .Where(f => f.Name == name);
                 foreach (var field in fields)
                 {

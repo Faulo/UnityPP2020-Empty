@@ -31,6 +31,10 @@ namespace Tests
         {
             return new FieldBridge<T>(gameObject, name);
         }
+        protected MethodBridge<T> FindMethod<T>(string name)
+        {
+            return new MethodBridge<T>(gameObject, name);
+        }
         protected T FindComponent<T>() where T : Component
         {
             var components = gameObject.GetComponents<T>();
