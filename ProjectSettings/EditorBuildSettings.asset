@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/PlatformTest.unity
     guid: a8e5b08930a89ef45b48493fe08c2d04
+  - enabled: 1
+    path: Assets/Scenes/ColorTest.unity
+    guid: 263e1b1103ac7a24a9bc7da81e530da9
   m_configObjects: {}
