@@ -216,8 +216,10 @@ namespace Tests
             GameObject prefab = TestUtils.LoadPrefab(PREFAB_MARIO);
 
             var mario = new MarioBridge(prefab);
-            CustomAssert.AreEqual(new Vector2(0, 0), mario.collider.offset, $"Mario's Collider2D must have an offset of {Vector2.zero}, but was {mario.collider.offset}!");
-            CustomAssert.AreEqual(new Vector2(1, 2), mario.collider.size, $"Mario's Collider2D must have an size of {Vector2.one}, but was {mario.collider.size}!");
+            var targetOffset = new Vector2(0, 0);
+            var targetSize = new Vector2(1, 2);
+            CustomAssert.AreEqual(targetOffset, mario.collider.offset, $"Mario's Collider2D must have an offset of {targetOffset}, but was {mario.collider.offset}!");
+            CustomAssert.AreEqual(targetSize, mario.collider.size, $"Mario's Collider2D must have an size of {targetSize}, but was {mario.collider.size}!");
             Assert.AreEqual(RigidbodyType2D.Dynamic, mario.rigidbody.bodyType, $"Mario must have a Dynamic body type!");
             Assert.AreEqual(RigidbodyConstraints2D.FreezeRotation, mario.rigidbody.constraints, $"Mario should not be able to rotate!");
         }
