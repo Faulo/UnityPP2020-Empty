@@ -31,19 +31,19 @@ namespace Tests
         {
             return new FieldBridge<T>(gameObject, name);
         }
-        protected MethodBridge<T> FindMethod<T>(string name)
+        protected MethodBridge<T> FindMethod<T>(string name, int parameterCount, string returnType)
         {
-            return new MethodBridge<T>(gameObject, name);
+            return new MethodBridge<T>(gameObject, name, parameterCount, returnType);
         }
         protected T FindComponent<T>() where T : Component
         {
-            var components = gameObject.GetComponents<T>();
+            T[] components = gameObject.GetComponents<T>();
             Assert.AreEqual(1, components.Length, $"There must be exactly 1 component of type of type '{typeof(T)}' in GameObject '{gameObject}'!");
             return components[0];
         }
         protected T FindComponentInChildren<T>() where T : Component
         {
-            var components = gameObject.GetComponentsInChildren<T>();
+            T[] components = gameObject.GetComponentsInChildren<T>();
             Assert.AreEqual(1, components.Length, $"There must be exactly 1 component of type of type '{typeof(T)}' in GameObject '{gameObject}' (or its children)!");
             return components[0];
         }

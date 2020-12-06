@@ -12,12 +12,12 @@ namespace Tests
         {
             get
             {
-                var (component, field) = fieldInfos.First();
+                (Component component, FieldInfo field) = fieldInfos.First();
                 return (T)field.GetValue(component);
             }
             set
             {
-                var (component, field) = fieldInfos.First();
+                (Component component, FieldInfo field) = fieldInfos.First();
                 field.SetValue(component, value);
             }
         }
@@ -29,13 +29,13 @@ namespace Tests
         }
         private IEnumerable<(Component, FieldInfo)> FindFields(GameObject obj, string name)
         {
-            foreach (var component in obj.GetComponents<Component>())
+            foreach (Component component in obj.GetComponents<Component>())
             {
-                var fields = component
+                IEnumerable<FieldInfo> fields = component
                     .GetType()
                     .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                     .Where(f => f.Name == name);
-                foreach (var field in fields)
+                foreach (FieldInfo field in fields)
                 {
                     yield return (component, field);
                 }

@@ -109,7 +109,7 @@ namespace Tests
         {
             get
             {
-                var keyboard = Keyboard.current;
+                Keyboard keyboard = Keyboard.current;
                 if (keyboard == null)
                 {
                     keyboard = InputSystem.AddDevice<Keyboard>();
@@ -124,8 +124,8 @@ namespace Tests
         [Test]
         public void TestGitTagExists([ValueSource(nameof(GIT_TAGS))] string tag)
         {
-            var directory = new DirectoryInfo(PROJECT_PATH);
-            var tags = TestUtils.RunGitCommand(directory.FullName, "tag");
+            DirectoryInfo directory = new DirectoryInfo(PROJECT_PATH);
+            string tags = TestUtils.RunGitCommand(directory.FullName, "tag");
             Assert.AreNotEqual("", tags, "No git tags found!");
             CollectionAssert.Contains(SPLIT_PATTERN.Split(tags), tag);
         }
@@ -139,7 +139,7 @@ namespace Tests
         public void TestPlatformPrefab()
         {
             GameObject prefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
-            var platform = new PlatformBridge(prefab);
+            PlatformBridge platform = new PlatformBridge(prefab);
             Assert.IsTrue(TestUtils.Approximately(Vector2.zero, platform.collider.offset), $"Platform's Collider2D must have an offset of {Vector2.zero}, but was {platform.collider.offset}!");
             Assert.IsTrue(TestUtils.Approximately(Vector2.one, platform.collider.size), $"Platform's Collider2D must have an offset of {Vector2.one}, but was {platform.collider.size}!");
         }
@@ -148,7 +148,7 @@ namespace Tests
         {
             yield return new WaitForFixedUpdate();
 
-            var platform = InstantiatePlatform(Vector3.zero);
+            PlatformBridge platform = InstantiatePlatform(Vector3.zero);
             for (int i = 0; i < 10; i++)
             {
                 yield return new WaitForFixedUpdate();
@@ -161,7 +161,7 @@ namespace Tests
         {
             GameObject prefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
 
-            var avatar = new AvatarBridge(prefab);
+            AvatarBridge avatar = new AvatarBridge(prefab);
             Assert.IsTrue(TestUtils.Approximately(Vector2.zero, avatar.collider.offset), $"Avatar's Collider2D must have an offset of {Vector2.zero}, but was {avatar.collider.offset}!");
             Assert.IsTrue(TestUtils.Approximately(Vector2.one, avatar.collider.size), $"Avatar's Collider2D must have an offset of {Vector2.one}, but was {avatar.collider.size}!");
             Assert.AreEqual(RigidbodyType2D.Dynamic, avatar.rigidbody.bodyType, $"Avatar must have a Dynamic body type!");
@@ -171,7 +171,7 @@ namespace Tests
         {
             yield return new WaitForFixedUpdate();
 
-            var avatar = InstantiateAvatar(Vector3.zero);
+            AvatarBridge avatar = InstantiateAvatar(Vector3.zero);
             avatar.isGrounded = false;
             float oldY = avatar.position.y;
             float oldDistance = 0;
@@ -196,7 +196,7 @@ namespace Tests
         {
             yield return new WaitForFixedUpdate();
 
-            var avatar = InstantiateAvatar(Vector3.zero);
+            AvatarBridge avatar = InstantiateAvatar(Vector3.zero);
             avatar.isGrounded = false;
             avatar.movementSpeed = speed;
 
@@ -226,10 +226,10 @@ namespace Tests
         {
             yield return new WaitForFixedUpdate();
 
-            var platform = InstantiatePlatform(Vector3.zero);
+            PlatformBridge platform = InstantiatePlatform(Vector3.zero);
             platform.scale = Vector3.one;
 
-            var avatar = InstantiateAvatar(Vector3.up);
+            AvatarBridge avatar = InstantiateAvatar(Vector3.up);
             avatar.scale = Vector3.one;
             avatar.isGrounded = false;
 
@@ -262,13 +262,13 @@ namespace Tests
 
             LoadTestScene(SCENE_NAME);
             yield return new WaitForFixedUpdate();
-            var pairs = FindPrefabInstances().ToArray();
+            (string, GameObject)[] pairs = FindPrefabInstances().ToArray();
 
-            var avatars = pairs
+            GameObject[] avatars = pairs
                 .Where(pair => pair.Item1.StartsWith(avatarPrefab.name))
                 .Select(pair => pair.Item2)
                 .ToArray();
-            var platforms = pairs
+            GameObject[] platforms = pairs
                 .Where(pair => pair.Item1.StartsWith(platformPrefab.name))
                 .Select(pair => pair.Item2)
                 .ToArray();
@@ -277,7 +277,7 @@ namespace Tests
             Assert.AreEqual(
                 SCENE_PLATFORM_COUNT, platforms.Length, $"Scene {SCENE_NAME} must have exactly {SCENE_PLATFORM_COUNT} instance(s) of prefab {platformPrefab}!");
 
-            var avatar = new AvatarBridge(avatars[0]);
+            AvatarBridge avatar = new AvatarBridge(avatars[0]);
 
             float timeout = Time.time + SCENE_TIMEOUT;
             yield return new WaitUntil(() => avatar.isGrounded || Time.time > timeout);
@@ -300,11 +300,11 @@ namespace Tests
 
         private IEnumerable<(string, GameObject)> FindPrefabInstances()
         {
-            var instances = currentScene
+            IEnumerable<GameObject> instances = currentScene
                 .GetRootGameObjects()
                 .SelectMany(obj => obj.GetComponentsInChildren<Transform>())
                 .Select(t => t.gameObject);
-            foreach (var instance in instances)
+            foreach (GameObject instance in instances)
             {
                 yield return (instance.name, instance);
             }
@@ -316,7 +316,7 @@ namespace Tests
 
             GameObject prefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
             GameObject instance = InstantiateGameObject(prefab, position, Quaternion.identity);
-            var avatar = new AvatarBridge(instance);
+            AvatarBridge avatar = new AvatarBridge(instance);
             avatar.rigidbody.mass = 1;
             avatar.rigidbody.drag = 0;
             return avatar;

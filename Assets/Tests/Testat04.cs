@@ -111,14 +111,14 @@ namespace Tests
         [Test]
         public void TestMaterialsExists([ValueSource(nameof(MATERIAL_FILES))] string path)
         {
-            var mat = LoadAsset<Material>(path);
+            Material mat = LoadAsset<Material>(path);
             Assert.IsTrue(mat.HasProperty(COLOR_KEY), $"Material {mat} must have property {COLOR_KEY}!");
         }
         [Test]
         public void TestPlatformPrefab()
         {
             GameObject prefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
-            var platform = new PlatformBridge(prefab);
+            PlatformBridge platform = new PlatformBridge(prefab);
             CustomAssert.AreEqual(Vector2.zero, platform.collider.offset, $"Platform's Collider2D must have an offset of {Vector2.zero}, but was {platform.collider.offset}!");
             CustomAssert.AreEqual(Vector2.one, platform.collider.size, $"Platform's Collider2D must have an offset of {Vector2.one}, but was {platform.collider.size}!");
             Assert.AreEqual(LoadAsset<Material>(PLATFORM_MATERIAL), platform.renderer.sharedMaterial, $"Platform's renderer must use Platform material!");
@@ -128,7 +128,7 @@ namespace Tests
         {
             yield return new WaitForFixedUpdate();
 
-            var platform = InstantiatePlatform(Vector3.zero);
+            PlatformBridge platform = InstantiatePlatform(Vector3.zero);
             platform.platformColor = color;
             for (int i = 0; i < 2; i++)
             {
@@ -143,7 +143,7 @@ namespace Tests
         {
             GameObject prefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
 
-            var avatar = new AvatarBridge(prefab);
+            AvatarBridge avatar = new AvatarBridge(prefab);
             CustomAssert.AreEqual(Vector2.zero, avatar.collider.offset, $"Avatar's Collider2D must have an offset of {Vector2.zero}, but was {avatar.collider.offset}!");
             CustomAssert.AreEqual(Vector2.one, avatar.collider.size, $"Avatar's Collider2D must have an offset of {Vector2.one}, but was {avatar.collider.size}!");
             Assert.AreEqual(RigidbodyType2D.Dynamic, avatar.rigidbody.bodyType, $"Avatar must have a Dynamic body type!");
@@ -154,7 +154,7 @@ namespace Tests
         {
             yield return new WaitForFixedUpdate();
 
-            var avatar = InstantiateAvatar(Vector3.zero);
+            AvatarBridge avatar = InstantiateAvatar(Vector3.zero);
             avatar.avatarColor = color;
             for (int i = 0; i < 2; i++)
             {
@@ -181,15 +181,15 @@ namespace Tests
             LoadTestScene(SCENE_NAME);
             yield return new WaitForFixedUpdate();
 
-            var avatars = FindPrefabInstances(avatarPrefab)
+            AvatarBridge[] avatars = FindPrefabInstances(avatarPrefab)
                 .Select(obj => new AvatarBridge(obj, true))
                 .ToArray();
 
-            var platforms = FindPrefabInstances(platformPrefab)
+            PlatformBridge[] platforms = FindPrefabInstances(platformPrefab)
                 .Select(obj => new PlatformBridge(obj))
                 .ToArray();
 
-            var colors = avatars
+            Color[] colors = avatars
                 .Select(a => a.avatarColor)
                 .Concat(platforms.Select(p => p.platformColor))
                 .Distinct()
@@ -211,7 +211,7 @@ namespace Tests
                 $"Each avatar and platform in scene {SCENE_NAME} must have a unique color!"
             );
 
-            var avatar = avatars[0];
+            AvatarBridge avatar = avatars[0];
             PlatformBridge platform = default;
 
             avatar.physics.onCollisionEnter += collision =>
@@ -237,7 +237,7 @@ namespace Tests
 
             GameObject prefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
             GameObject instance = InstantiateGameObject(prefab, position, Quaternion.identity);
-            var avatar = new AvatarBridge(instance, true);
+            AvatarBridge avatar = new AvatarBridge(instance, true);
             avatar.rigidbody.mass = 1;
             avatar.rigidbody.drag = 0;
             return avatar;

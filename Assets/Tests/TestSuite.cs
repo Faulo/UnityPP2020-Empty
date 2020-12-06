@@ -27,7 +27,7 @@ namespace Tests
         {
             while (loadedObjects.Count > 0)
             {
-                var obj = loadedObjects.Dequeue();
+                GameObject obj = loadedObjects.Dequeue();
                 if (obj)
                 {
                     Object.Destroy(obj);
@@ -37,7 +37,7 @@ namespace Tests
 
             if (loadedScene.IsValid())
             {
-                var operation = SceneManager.UnloadSceneAsync(loadedScene);
+                AsyncOperation operation = SceneManager.UnloadSceneAsync(loadedScene);
                 yield return new WaitUntil(() => operation == null || operation.isDone);
                 loadedScene = default;
             }
@@ -53,7 +53,7 @@ namespace Tests
         protected T LoadAsset<T>(string path) where T : Object
         {
             FileAssert.Exists(new FileInfo(path));
-            var asset = AssetDatabase.LoadAssetAtPath<T>(path);
+            T asset = AssetDatabase.LoadAssetAtPath<T>(path);
             Assert.IsNotNull(asset, $"Could not load asset of type {typeof(T).Name} at path {path}!");
             return asset;
         }

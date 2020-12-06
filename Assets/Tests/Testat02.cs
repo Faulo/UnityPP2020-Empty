@@ -40,7 +40,7 @@ namespace Tests
         {
             get
             {
-                var keyboard = Keyboard.current;
+                Keyboard keyboard = Keyboard.current;
                 if (keyboard == null)
                 {
                     keyboard = InputSystem.AddDevice<Keyboard>();
@@ -118,7 +118,7 @@ namespace Tests
         {
             LoadTestScene(SCENE_NAME);
             yield return new WaitForFixedUpdate();
-            var avatars = FindAvatars();
+            IEnumerable<Transform> avatars = FindAvatars();
 
             Assert.AreEqual(1, avatars.Count(), $"There must be exactly 1 GameObject with the name of '{AVATAR_NAME}' in scene '{SCENE_NAME}'!");
         }
@@ -127,9 +127,9 @@ namespace Tests
         {
             LoadTestScene(SCENE_NAME);
             yield return new WaitForFixedUpdate();
-            var avatar = FindAvatars().First();
+            Transform avatar = FindAvatars().First();
 
-            var target = move.direction;
+            Vector3 target = move.direction;
             avatar.transform.position = Vector3.zero;
             yield return new WaitForFixedUpdate();
             Assert.AreEqual(Vector3.zero, avatar.transform.position, $"Must not move avatar when no input is happening.");
@@ -137,7 +137,7 @@ namespace Tests
             Array.ForEach(move.keys, key => input.Press(key));
             InputSystem.Update();
             yield return new WaitForFixedUpdate();
-            var actual = avatar.transform.position;
+            Vector3 actual = avatar.transform.position;
             Assert.AreEqual(Math.Sign(target.x), Math.Sign(actual.x), $"With input {move}, avatar's x should've moved towards {target.x}");
             Assert.AreEqual(Math.Sign(target.y), Math.Sign(actual.y), $"With input {move}, avatar's y should've moved towards {target.y}");
             Assert.AreEqual(Math.Sign(target.z), Math.Sign(actual.z), $"With input {move}, avatar's z should've moved towards {target.z}");
@@ -157,13 +157,13 @@ namespace Tests
         }
         private IEnumerable<(Component, FieldInfo)> FindSpeedFields(Component obj)
         {
-            foreach (var component in obj.GetComponents<Component>())
+            foreach (Component component in obj.GetComponents<Component>())
             {
-                var fields = component
+                IEnumerable<FieldInfo> fields = component
                     .GetType()
                     .GetFields()
                     .Where(f => f.Name == AVATAR_SPEED_FIELD);
-                foreach (var field in fields)
+                foreach (FieldInfo field in fields)
                 {
                     yield return (component, field);
                 }
@@ -174,8 +174,8 @@ namespace Tests
         {
             LoadTestScene(SCENE_NAME);
             yield return new WaitForFixedUpdate();
-            var avatar = FindAvatars().First();
-            var speedFields = FindSpeedFields(avatar);
+            Transform avatar = FindAvatars().First();
+            IEnumerable<(Component, FieldInfo)> speedFields = FindSpeedFields(avatar);
 
             Assert.AreEqual(1, speedFields.Count(), $"There must be exactly 1 field with the name of '{AVATAR_SPEED_FIELD}' in GameObject '{AVATAR_NAME}'!");
         }
@@ -187,15 +187,15 @@ namespace Tests
         {
             LoadTestScene(SCENE_NAME);
             yield return new WaitForFixedUpdate();
-            var avatar = FindAvatars().First();
-            var (speedComponent, speedField) = FindSpeedFields(avatar).First();
+            Transform avatar = FindAvatars().First();
+            (Component speedComponent, FieldInfo speedField) = FindSpeedFields(avatar).First();
 
             speedField.SetValue(speedComponent, speed);
 
             float duration = frames * Time.fixedDeltaTime;
 
-            var keyName = string.Join("+", move.keys.Select(key => key.name));
-            var target = speed * move.direction * duration;
+            string keyName = string.Join("+", move.keys.Select(key => key.name));
+            Vector3 target = speed * move.direction * duration;
             avatar.transform.position = Vector3.zero;
 
             yield return new WaitForFixedUpdate();
@@ -208,7 +208,7 @@ namespace Tests
                 yield return new WaitForFixedUpdate();
             }
 
-            var actual = avatar.transform.position;
+            Vector3 actual = avatar.transform.position;
 
             Assert.IsTrue(TestUtils.Approximately(target, actual), $"With input {keyName}, speed {speed}m/s and waiting {frames} FixedUpdate frames, avatar should have arrived at position {target}, but was {actual}");
 

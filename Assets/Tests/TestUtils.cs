@@ -39,7 +39,7 @@ namespace Tests
         public static string RunGitCommand(string projectPath, string gitCommand)
         {
             // Set up our processInfo to run the git command and log to output and errorOutput.
-            var processInfo = new System.Diagnostics.ProcessStartInfo("git", @gitCommand)
+            System.Diagnostics.ProcessStartInfo processInfo = new System.Diagnostics.ProcessStartInfo("git", @gitCommand)
             {
                 WorkingDirectory = projectPath,
                 CreateNoWindow = true,          // We want no visible pop-ups
@@ -49,7 +49,7 @@ namespace Tests
             };
 
             // Set up the Process
-            var process = new System.Diagnostics.Process
+            System.Diagnostics.Process process = new System.Diagnostics.Process
             {
                 StartInfo = processInfo
             };
@@ -87,7 +87,7 @@ namespace Tests
 
             FileInfo file = new FileInfo(path);
             FileAssert.Exists(file);
-            var obj = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            GameObject obj = AssetDatabase.LoadAssetAtPath<GameObject>(path);
             Assert.NotNull(obj, $"Prefab '{path}' is empty?");
             return obj;
         }

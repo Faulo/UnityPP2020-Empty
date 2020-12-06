@@ -80,8 +80,8 @@ namespace Tests
                 maximumSpeedBridge = FindField<float>(nameof(maximumSpeed));
                 jumpSpeedBridge = FindField<float>(nameof(jumpSpeed));
 
-                getCurrentAccelerationBridge = FindMethod<float>(nameof(GetCurrentAcceleration));
-                getCurrentJumpSpeedBridge = FindMethod<float>(nameof(GetCurrentJumpSpeed));
+                getCurrentAccelerationBridge = FindMethod<float>(nameof(GetCurrentAcceleration), 0, "float");
+                getCurrentJumpSpeedBridge = FindMethod<float>(nameof(GetCurrentJumpSpeed), 0, "float");
 
                 rigidbody = FindComponent<Rigidbody2D>();
                 collider = FindComponent<BoxCollider2D>();
@@ -145,7 +145,7 @@ namespace Tests
         {
             get
             {
-                var keyboard = Keyboard.current;
+                Keyboard keyboard = Keyboard.current;
                 if (keyboard == null)
                 {
                     keyboard = InputSystem.AddDevice<Keyboard>();
@@ -194,18 +194,18 @@ namespace Tests
         [Test]
         public void TestPhysicsMaterialsFriction()
         {
-            var icy = LoadAsset<PhysicsMaterial2D>(MATERIAL_ICY);
-            var dflt = LoadAsset<PhysicsMaterial2D>(MATERIAL_DEFAULT);
-            var sticky = LoadAsset<PhysicsMaterial2D>(MATERIAL_STICKY);
+            PhysicsMaterial2D icy = LoadAsset<PhysicsMaterial2D>(MATERIAL_ICY);
+            PhysicsMaterial2D dflt = LoadAsset<PhysicsMaterial2D>(MATERIAL_DEFAULT);
+            PhysicsMaterial2D sticky = LoadAsset<PhysicsMaterial2D>(MATERIAL_STICKY);
             Assert.Less(icy.friction, dflt.friction, $"Friction of {icy} must be lower than friction of {dflt}!");
             Assert.Less(dflt.friction, sticky.friction, $"Friction of {dflt} must be lower than friction of {sticky}!");
         }
         [Test]
         public void TestPlatformPrefab([ValueSource(nameof(PLATFORM_INFOS))] (string, string) info)
         {
-            var prefab = TestUtils.LoadPrefab(info.Item1);
-            var mat = LoadAsset<PhysicsMaterial2D>(info.Item2);
-            var platform = new PlatformBridge(prefab);
+            GameObject prefab = TestUtils.LoadPrefab(info.Item1);
+            PhysicsMaterial2D mat = LoadAsset<PhysicsMaterial2D>(info.Item2);
+            PlatformBridge platform = new PlatformBridge(prefab);
             Assert.AreEqual(mat, platform.collider.sharedMaterial, $"Platform {prefab} should use physics material {mat}!");
             Assert.Greater(platform.allowedAcceleration, 0, $"Platform {prefab} should have an {nameof(platform.allowedAcceleration)} > 0!");
             Assert.Greater(platform.jumpSpeedMultiplier, 0, $"Platform {prefab} should have an {nameof(platform.jumpSpeedMultiplier)} > 0!");
@@ -215,11 +215,14 @@ namespace Tests
         {
             GameObject prefab = TestUtils.LoadPrefab(PREFAB_MARIO);
 
-            var mario = new MarioBridge(prefab);
-            var targetOffset = new Vector2(0, 0);
-            var targetSize = new Vector2(1, 2);
-            CustomAssert.AreEqual(targetOffset, mario.collider.offset, $"Mario's Collider2D must have an offset of {targetOffset}, but was {mario.collider.offset}!");
-            CustomAssert.AreEqual(targetSize, mario.collider.size, $"Mario's Collider2D must have an size of {targetSize}, but was {mario.collider.size}!");
+            MarioBridge mario = new MarioBridge(prefab);
+            Vector2 targetOffset = new Vector2(0, 0);
+            Vector2 targetSize = new Vector2(1, 2);
+            Assert.AreNotEqual(mario.gameObject, mario.renderer.gameObject, $"Mario's Renderer should be on its own GameObject, as a child of Mario's prefab!");
+            CustomAssert.AreEqual(Vector3.one, mario.transform.localScale, $"Mario's Transform must have an scale of {Vector3.one}!");
+            CustomAssert.AreEqual(targetOffset, mario.collider.offset, $"Mario's Collider2D must have an offset of {targetOffset}!");
+            CustomAssert.AreEqual(targetSize, mario.collider.size, $"Mario's Collider2D must have an size of {targetSize}!");
+            CustomAssert.AreEqual(targetSize, (Vector2)mario.renderer.transform.localScale, $"Mario's Renderer's Transform must have an scale of {targetSize}!");
             Assert.AreEqual(RigidbodyType2D.Dynamic, mario.rigidbody.bodyType, $"Mario must have a Dynamic body type!");
             Assert.AreEqual(RigidbodyConstraints2D.FreezeRotation, mario.rigidbody.constraints, $"Mario should not be able to rotate!");
         }
@@ -228,7 +231,7 @@ namespace Tests
         {
             yield return new WaitForFixedUpdate();
 
-            var mario = InstantiateMario(Vector3.zero);
+            MarioBridge mario = InstantiateMario(Vector3.zero);
             mario.maximumSpeed = move.maximumSpeed;
             mario.defaultAcceleration = move.defaultAcceleration;
             mario.jumpSpeed = move.maximumSpeed;
@@ -283,7 +286,7 @@ namespace Tests
                     1,
                     $"Scene {SCENE_NAME} must at least 1 instance of prefab {prefab}!"
                 );
-                var color = instances[0].rendererColor;
+                Color color = instances[0].rendererColor;
                 for (int i = 1; i < instances.Length; i++)
                 {
                     CustomAssert.AreEqual(color, instances[i].rendererColor, $"All instancecs of {prefab} must have the same color!");
@@ -299,21 +302,21 @@ namespace Tests
             LoadTestScene(SCENE_NAME);
             yield return new WaitForFixedUpdate();
 
-            var avatars = FindPrefabInstances(avatarPrefab)
+            MarioBridge[] avatars = FindPrefabInstances(avatarPrefab)
                 .Select(obj => new MarioBridge(obj, true))
                 .ToArray();
 
-            var icePlatforms = FindPrefabInstances(icePrefab)
+            PlatformBridge[] icePlatforms = FindPrefabInstances(icePrefab)
                 .Select(obj => new PlatformBridge(obj))
                 .ToArray();
-            var metalPlatforms = FindPrefabInstances(metalPrefab)
+            PlatformBridge[] metalPlatforms = FindPrefabInstances(metalPrefab)
                 .Select(obj => new PlatformBridge(obj))
                 .ToArray();
-            var dirtPlatforms = FindPrefabInstances(dirtPrefab)
+            PlatformBridge[] dirtPlatforms = FindPrefabInstances(dirtPrefab)
                 .Select(obj => new PlatformBridge(obj))
                 .ToArray();
 
-            var platforms = icePlatforms
+            PlatformBridge[] platforms = icePlatforms
                 .Union(metalPlatforms)
                 .Union(dirtPlatforms)
                 .ToArray();
@@ -350,7 +353,7 @@ namespace Tests
                 $"Scene {SCENE_NAME} must have at least {SCENE_PLATFORM_COUNT} instances of platform prefabs!"
             );
 
-            var mario = avatars[0];
+            MarioBridge mario = avatars[0];
             PlatformBridge platform = default;
 
             mario.physics.onCollisionEnter += collision =>
@@ -377,7 +380,7 @@ namespace Tests
 
             GameObject prefab = TestUtils.LoadPrefab(PREFAB_MARIO);
             GameObject instance = InstantiateGameObject(prefab, position, Quaternion.identity);
-            var avatar = new MarioBridge(instance, true);
+            MarioBridge avatar = new MarioBridge(instance, true);
             avatar.rigidbody.mass = 1;
             avatar.rigidbody.drag = 0;
             return avatar;
