@@ -83,9 +83,6 @@ namespace Tests
             }
         }
 
-
-        private static readonly InputTestFixture input = new InputTestFixture();
-
         [Test]
         public void TestGitFiles([ValueSource(nameof(GIT_FILES))] string path)
         {
@@ -134,26 +131,26 @@ namespace Tests
             yield return new WaitForFixedUpdate();
             Assert.AreEqual(Vector3.zero, avatar.transform.position, $"Must not move avatar when no input is happening.");
 
-            Array.ForEach(move.keys, key => input.Press(key));
-            InputSystem.Update();
-            yield return new WaitForFixedUpdate();
-            Vector3 actual = avatar.transform.position;
-            Assert.AreEqual(Math.Sign(target.x), Math.Sign(actual.x), $"With input {move}, avatar's x should've moved towards {target.x}");
-            Assert.AreEqual(Math.Sign(target.y), Math.Sign(actual.y), $"With input {move}, avatar's y should've moved towards {target.y}");
-            Assert.AreEqual(Math.Sign(target.z), Math.Sign(actual.z), $"With input {move}, avatar's z should've moved towards {target.z}");
+            Vector3 position;
+
+            using (new InputPress(move.keys))
+            {
+                yield return new WaitForFixedUpdate();
+                position = avatar.transform.position;
+                Assert.AreEqual(Math.Sign(target.x), Math.Sign(position.x), $"With input {move}, avatar's x should've moved towards {target.x}");
+                Assert.AreEqual(Math.Sign(target.y), Math.Sign(position.y), $"With input {move}, avatar's y should've moved towards {target.y}");
+                Assert.AreEqual(Math.Sign(target.z), Math.Sign(position.z), $"With input {move}, avatar's z should've moved towards {target.z}");
+
+                yield return new WaitForFixedUpdate();
+
+                Assert.AreNotEqual(position, avatar.transform.position, $"Avatar must keep moving in direction {target}");
+
+                position = avatar.transform.position;
+            }
 
             yield return new WaitForFixedUpdate();
 
-            Assert.AreNotEqual(actual, avatar.transform.position, $"Avatar must keep moving in direction {target}");
-
-            actual = avatar.transform.position;
-
-            Array.ForEach(move.keys, key => input.Release(key));
-            InputSystem.Update();
-
-            yield return new WaitForFixedUpdate();
-
-            Assert.AreEqual(actual, avatar.transform.position, $"Avatar should've stopped at position {actual}");
+            Assert.AreEqual(position, avatar.transform.position, $"Avatar should've stopped at position {position}");
         }
         private IEnumerable<(Component, FieldInfo)> FindSpeedFields(Component obj)
         {
@@ -200,20 +197,20 @@ namespace Tests
 
             yield return new WaitForFixedUpdate();
 
-            Array.ForEach(move.keys, key => input.Press(key));
-            InputSystem.Update();
-
-            for (int i = 0; i < frames; i++)
+            using (new InputPress(move.keys))
             {
-                yield return new WaitForFixedUpdate();
+
+                for (int i = 0; i < frames; i++)
+                {
+                    yield return new WaitForFixedUpdate();
+                }
+
+                Vector3 actual = avatar.transform.position;
+
+                Assert.IsTrue(TestUtils.Approximately(target, actual), $"With input {keyName}, speed {speed}m/s and waiting {frames} FixedUpdate frames, avatar should have arrived at position {target}, but was {actual}");
             }
 
-            Vector3 actual = avatar.transform.position;
-
-            Assert.IsTrue(TestUtils.Approximately(target, actual), $"With input {keyName}, speed {speed}m/s and waiting {frames} FixedUpdate frames, avatar should have arrived at position {target}, but was {actual}");
-
-            Array.ForEach(move.keys, key => input.Release(key));
-            InputSystem.Update();
+            yield return new WaitForFixedUpdate();
         }
     }
 }

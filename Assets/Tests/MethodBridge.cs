@@ -10,8 +10,15 @@ namespace Tests
     {
         public T Invoke(params object[] args)
         {
-            (Component component, MethodInfo method) = methodInfos.First();
-            return (T)method.Invoke(component, args);
+            try
+            {
+                (Component component, MethodInfo method) = methodInfos.First();
+                return (T)method.Invoke(component, args);
+            }
+            catch (TargetInvocationException e)
+            {
+                throw e.InnerException;
+            }
         }
         private readonly (Component, MethodInfo)[] methodInfos;
         public MethodBridge(GameObject obj, string name, int parameterCount, string returnType)

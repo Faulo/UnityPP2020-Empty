@@ -140,7 +140,6 @@ namespace Tests
                 return $"{key.name}, {defaultAcceleration}m/s², {maximumSpeed}m/s";
             }
         }
-        private static readonly InputTestFixture input = new InputTestFixture();
         private static Move[] MOVEMENT_DIRECTIONS
         {
             get
@@ -241,33 +240,39 @@ namespace Tests
             float timeout = Time.time + SCENE_TIMEOUT;
             float targetSpeed = move.sign * mario.maximumSpeed;
             float previousSpeed = mario.rigidbody.velocity.x;
+            float currentSpeed = 0;
 
             Assert.AreEqual(0, previousSpeed, "Mario should start with horizontal speed of 0m/s!");
             Assert.AreEqual(move.maximumSpeed, mario.GetCurrentJumpSpeed(), $"In freefall, Mario's jump speed should be {move.maximumSpeed}m/s!");
 
-            input.Press(move.key);
-            InputSystem.Update();
-
-            do
+            using (new InputPress(move.key))
             {
-                yield return new WaitForFixedUpdate();
-                float currentSpeed = mario.rigidbody.velocity.x;
-                Assert.IsFalse(mario.isGrounded, "Mario should not become grounded in empty scene!");
-                Assert.AreEqual(move.maximumSpeed, mario.maximumSpeed, $"Mario's {nameof(mario.maximumSpeed)} should not be changed by script!");
-                Assert.AreEqual(move.defaultAcceleration, mario.defaultAcceleration, $"Mario's {nameof(mario.defaultAcceleration)} should not be changed by script!");
-                Assert.AreEqual(move.defaultAcceleration, mario.GetCurrentAcceleration(), $"Mario's {nameof(mario.GetCurrentAcceleration)} should return {nameof(mario.defaultAcceleration)} in freefall!");
-                Assert.Greater(Mathf.Abs(currentSpeed), Mathf.Abs(previousSpeed), $"Mario's speed must increase each frame!");
-                if (Time.time > timeout)
+                do
                 {
-                    Assert.Fail($"In freefall and with acceleration of {mario.defaultAcceleration}m/s², Mario should reach {targetSpeed}m/s in {SCENE_TIMEOUT}s, but was {mario.rigidbody.velocity.x}m/s!");
-                }
-                previousSpeed = currentSpeed;
-            } while (!Mathf.Approximately(previousSpeed, targetSpeed));
+                    yield return new WaitForFixedUpdate();
+                    yield return new WaitForFixedUpdate();
+                    currentSpeed = mario.rigidbody.velocity.x;
+                    Assert.IsFalse(mario.isGrounded, "Mario should not become grounded in empty scene!");
+                    Assert.AreEqual(move.maximumSpeed, mario.maximumSpeed, $"Mario's {nameof(mario.maximumSpeed)} should not be changed by script!");
+                    Assert.AreEqual(move.defaultAcceleration, mario.defaultAcceleration, $"Mario's {nameof(mario.defaultAcceleration)} should not be changed by script!");
+                    Assert.AreEqual(move.defaultAcceleration, mario.GetCurrentAcceleration(), $"Mario's {nameof(mario.GetCurrentAcceleration)} should return {nameof(mario.defaultAcceleration)} in freefall!");
+                    Assert.Greater(Mathf.Abs(currentSpeed), Mathf.Abs(previousSpeed), $"Mario's speed must increase each frame!");
+                    if (Time.time > timeout)
+                    {
+                        Assert.Fail($"In freefall and with acceleration of {mario.defaultAcceleration}m/s², Mario should reach {targetSpeed}m/s in {SCENE_TIMEOUT}s, but was {mario.rigidbody.velocity.x}m/s!");
+                    }
+                    previousSpeed = currentSpeed;
+                } while (Mathf.Abs(previousSpeed) < Mathf.Abs(targetSpeed));
+                yield return new WaitForFixedUpdate();
+                yield return new WaitForFixedUpdate();
+                currentSpeed = mario.rigidbody.velocity.x;
+                Assert.AreEqual(targetSpeed, currentSpeed, $"In freefall and with acceleration of {mario.defaultAcceleration}m/s², Mario must never exceed his maximum speed of {targetSpeed}m/s!");
+            }
 
-            input.Release(move.key);
-            InputSystem.Update();
+            yield return new WaitForFixedUpdate();
 
             Object.Destroy(mario.gameObject);
+
             yield return new WaitForFixedUpdate();
         }
         [Test]

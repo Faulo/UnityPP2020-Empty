@@ -86,7 +86,6 @@ namespace Tests
                 return key.name;
             }
         }
-        private static readonly InputTestFixture input = new InputTestFixture();
 
         private const string PROJECT_PATH = ".";
         private static readonly Regex SPLIT_PATTERN = new Regex(@"\s+");
@@ -205,21 +204,20 @@ namespace Tests
             float target = avatar.position.x;
             target += move.sign * speed * frames * Time.fixedDeltaTime;
 
-            input.Press(move.key);
-            InputSystem.Update();
-
-            for (int i = 0; i < frames; i++)
+            using (new InputPress(move.key))
             {
-                yield return new WaitForFixedUpdate();
+                for (int i = 0; i < frames; i++)
+                {
+                    yield return new WaitForFixedUpdate();
+                }
+
+                float actual = avatar.position.x;
+                Assert.IsTrue(TestUtils.Approximately(target, actual), $"With input {move}, speed {speed}m/s and waiting {frames} FixedUpdate frames, avatar should have arrived at X={target}, but was at X={actual}!");
             }
 
-            float actual = avatar.position.x;
-            Assert.IsTrue(TestUtils.Approximately(target, actual), $"With input {move}, speed {speed}m/s and waiting {frames} FixedUpdate frames, avatar should have arrived at X={target}, but was at X={actual}!");
-
-            input.Release(move.key);
-            InputSystem.Update();
-
             Object.Destroy(avatar.gameObject);
+
+            yield return new WaitForFixedUpdate();
         }
         [UnityTest]
         public IEnumerator TestAvatarGravityWhenGrounded()
@@ -283,19 +281,19 @@ namespace Tests
             yield return new WaitUntil(() => avatar.isGrounded || Time.time > timeout);
             Assert.IsTrue(avatar.isGrounded, $"After waiting {SCENE_TIMEOUT}s, avatar should be grounded!");
 
-            input.Press(AVATAR_JUMPKEY);
-            InputSystem.Update();
+            using (new InputPress(AVATAR_JUMPKEY))
+            {
 
-            timeout = Time.time + SCENE_TIMEOUT;
-            yield return new WaitUntil(() => !avatar.isGrounded || Time.time > timeout);
-            Assert.IsFalse(avatar.isGrounded, $"After pressing {AVATAR_JUMPKEY} and waiting {SCENE_TIMEOUT}s, avatar should have been airborne!");
-
-            input.Release(AVATAR_JUMPKEY);
-            InputSystem.Update();
+                timeout = Time.time + SCENE_TIMEOUT;
+                yield return new WaitUntil(() => !avatar.isGrounded || Time.time > timeout);
+                Assert.IsFalse(avatar.isGrounded, $"After pressing {AVATAR_JUMPKEY} and waiting {SCENE_TIMEOUT}s, avatar should have been airborne!");
+            }
 
             timeout = Time.time + SCENE_TIMEOUT;
             yield return new WaitUntil(() => avatar.isGrounded || Time.time > timeout);
             Assert.IsTrue(avatar.isGrounded, $"After jumping and waiting {SCENE_TIMEOUT}s, avatar should have landed!");
+
+            yield return new WaitForFixedUpdate();
         }
 
         private IEnumerable<(string, GameObject)> FindPrefabInstances()
