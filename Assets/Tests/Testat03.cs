@@ -121,7 +121,7 @@ namespace Tests
             }
         }
         [Test]
-        public void TestGitTagExists([ValueSource(nameof(GIT_TAGS))] string tag)
+        public void T02_GitTagExists([ValueSource(nameof(GIT_TAGS))] string tag)
         {
             DirectoryInfo directory = new DirectoryInfo(PROJECT_PATH);
             string tags = TestUtils.RunGitCommand(directory.FullName, "tag");
@@ -129,13 +129,13 @@ namespace Tests
             CollectionAssert.Contains(SPLIT_PATTERN.Split(tags), tag);
         }
         [Test]
-        public void TestPrefabExists([ValueSource(nameof(PREFAB_FILES))] string path)
+        public void T03_PrefabExists([ValueSource(nameof(PREFAB_FILES))] string path)
         {
             FileInfo file = new FileInfo(path);
             FileAssert.Exists(file);
         }
         [Test]
-        public void TestPlatformPrefab()
+        public void T04a_PlatformPrefab()
         {
             GameObject prefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
             PlatformBridge platform = new PlatformBridge(prefab);
@@ -143,7 +143,7 @@ namespace Tests
             Assert.IsTrue(TestUtils.Approximately(Vector2.one, platform.collider.size), $"Platform's Collider2D must have an offset of {Vector2.one}, but was {platform.collider.size}!");
         }
         [UnityTest]
-        public IEnumerator TestPlatformGravity()
+        public IEnumerator T04b_PlatformGravity()
         {
             yield return new WaitForFixedUpdate();
 
@@ -156,7 +156,7 @@ namespace Tests
             Object.Destroy(platform.gameObject);
         }
         [Test]
-        public void TestAvatarPrefab()
+        public void T05a_AvatarPrefab()
         {
             GameObject prefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
 
@@ -166,7 +166,7 @@ namespace Tests
             Assert.AreEqual(RigidbodyType2D.Dynamic, avatar.rigidbody.bodyType, $"Avatar must have a Dynamic body type!");
         }
         [UnityTest]
-        public IEnumerator TestAvatarGravityWhenFalling()
+        public IEnumerator T05b_AvatarGravityWhenFalling()
         {
             yield return new WaitForFixedUpdate();
 
@@ -188,7 +188,7 @@ namespace Tests
             Object.Destroy(avatar.gameObject);
         }
         [UnityTest]
-        public IEnumerator TestAvatarMovement(
+        public IEnumerator T05c_AvatarMovement(
             [ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move,
             [ValueSource(nameof(AVATAR_SPEED_VALUES))] float speed,
             [ValueSource(nameof(AVATAR_SPEED_DURATIONS))] int frames)
@@ -220,7 +220,7 @@ namespace Tests
             yield return new WaitForFixedUpdate();
         }
         [UnityTest]
-        public IEnumerator TestAvatarGravityWhenGrounded()
+        public IEnumerator T05d_AvatarGravityWhenGrounded()
         {
             yield return new WaitForFixedUpdate();
 
@@ -245,13 +245,13 @@ namespace Tests
 
 
         [Test]
-        public void TestSceneExists()
+        public void T06a_SceneExists()
         {
             FileInfo file = new FileInfo(SCENE_PATH);
             FileAssert.Exists(file);
         }
         [UnityTest]
-        public IEnumerator TestPrefabInstancesExistInScene()
+        public IEnumerator T06b_PrefabInstancesExistInScene()
         {
             yield return new WaitForFixedUpdate();
 

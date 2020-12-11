@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -35,6 +36,12 @@ namespace Tests
                 }
             }
 
+            for (GameObject obj = FindObjectToDestroy(); obj; obj = FindObjectToDestroy())
+            {
+                Object.Destroy(obj);
+                yield return null;
+            }
+
             if (loadedScene.IsValid())
             {
                 AsyncOperation operation = SceneManager.UnloadSceneAsync(loadedScene);
@@ -42,6 +49,12 @@ namespace Tests
                 loadedScene = default;
             }
         }
+
+        private GameObject FindObjectToDestroy()
+        {
+            return SceneManager.GetActiveScene().GetRootGameObjects().Skip(1).FirstOrDefault();
+        }
+
         private Scene loadedScene;
         protected Scene LoadTestScene(string name)
         {
@@ -58,7 +71,7 @@ namespace Tests
             return asset;
         }
 
-        private readonly Queue<GameObject> loadedObjects = new Queue<GameObject>();
+        protected readonly Queue<GameObject> loadedObjects = new Queue<GameObject>();
         protected GameObject InstantiateGameObject(GameObject prefab, Vector3 position, Quaternion rotation)
         {
             GameObject instance = Object.Instantiate(prefab, position, rotation);

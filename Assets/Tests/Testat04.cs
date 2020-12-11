@@ -103,19 +103,19 @@ namespace Tests
         private const string COLOR_KEY = "_BaseColor";
 
         [Test]
-        public void TestPrefabExists([ValueSource(nameof(PREFAB_FILES))] string path)
+        public void T01_PrefabExists([ValueSource(nameof(PREFAB_FILES))] string path)
         {
             FileInfo file = new FileInfo(path);
             FileAssert.Exists(file);
         }
         [Test]
-        public void TestMaterialsExists([ValueSource(nameof(MATERIAL_FILES))] string path)
+        public void T02_MaterialsExists([ValueSource(nameof(MATERIAL_FILES))] string path)
         {
             Material mat = LoadAsset<Material>(path);
             Assert.IsTrue(mat.HasProperty(COLOR_KEY), $"Material {mat} must have property {COLOR_KEY}!");
         }
         [Test]
-        public void TestPlatformPrefab()
+        public void T03_PlatformPrefab()
         {
             GameObject prefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
             PlatformBridge platform = new PlatformBridge(prefab);
@@ -124,7 +124,7 @@ namespace Tests
             Assert.AreEqual(LoadAsset<Material>(PLATFORM_MATERIAL), platform.renderer.sharedMaterial, $"Platform's renderer must use Platform material!");
         }
         [UnityTest]
-        public IEnumerator TestPlatformColor([ValueSource(nameof(COLOR_VALUES))] Color color)
+        public IEnumerator T05_PlatformColor([ValueSource(nameof(COLOR_VALUES))] Color color)
         {
             yield return new WaitForFixedUpdate();
 
@@ -139,7 +139,7 @@ namespace Tests
             Object.Destroy(platform.gameObject);
         }
         [Test]
-        public void TestAvatarPrefab()
+        public void T04_AvatarPrefab()
         {
             GameObject prefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
 
@@ -150,7 +150,7 @@ namespace Tests
             Assert.AreEqual(LoadAsset<Material>(AVATAR_MATERIAL), avatar.renderer.sharedMaterial, $"Avatar's renderer must use Avatar material!");
         }
         [UnityTest]
-        public IEnumerator TestAvatarColor([ValueSource(nameof(COLOR_VALUES))] Color color)
+        public IEnumerator T06_AvatarColor([ValueSource(nameof(COLOR_VALUES))] Color color)
         {
             yield return new WaitForFixedUpdate();
 
@@ -165,13 +165,13 @@ namespace Tests
             Object.Destroy(avatar.gameObject);
         }
         [Test]
-        public void TestSceneExists()
+        public void T07a_SceneExists()
         {
             FileInfo file = new FileInfo(SCENE_PATH);
             FileAssert.Exists(file);
         }
         [UnityTest]
-        public IEnumerator TestPrefabInstancesExistInScene()
+        public IEnumerator T07b_PrefabInstancesExistInScene()
         {
             yield return new WaitForFixedUpdate();
 

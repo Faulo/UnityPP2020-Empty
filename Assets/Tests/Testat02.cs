@@ -84,34 +84,26 @@ namespace Tests
         }
 
         [Test]
-        public void TestGitFiles([ValueSource(nameof(GIT_FILES))] string path)
+        public void T01_GitFiles([ValueSource(nameof(GIT_FILES))] string path)
         {
             FileInfo file = new FileInfo(path);
             Assert.IsTrue(file.Exists, $"File '{file.FullName}' not found.");
         }
 
         [Test]
-        public void TestEmailAddress()
+        public void T02_EmailAddress()
         {
             Assert.IsTrue(EMAIL_PATTERN.IsMatch(Application.companyName), $"Company Name must be a valid e-mail address, but was '{Application.companyName}'");
         }
 
         [Test]
-        public void TestSceneExists()
+        public void T03a_SceneExists()
         {
             FileInfo file = new FileInfo(SCENE_PATH);
             Assert.IsTrue(file.Exists, $"File '{file.FullName}' not found.");
         }
-
-        private IEnumerable<Transform> FindAvatars()
-        {
-            return currentScene
-                .GetRootGameObjects()
-                .SelectMany(obj => obj.GetComponentsInChildren<Transform>())
-                .Where(transform => transform.gameObject.name == AVATAR_NAME);
-        }
         [UnityTest]
-        public IEnumerator TestAvatarExists()
+        public IEnumerator T03b_AvatarExists()
         {
             LoadTestScene(SCENE_NAME);
             yield return new WaitForFixedUpdate();
@@ -120,7 +112,7 @@ namespace Tests
             Assert.AreEqual(1, avatars.Count(), $"There must be exactly 1 GameObject with the name of '{AVATAR_NAME}' in scene '{SCENE_NAME}'!");
         }
         [UnityTest]
-        public IEnumerator TestAvatarInput([ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move)
+        public IEnumerator T03c_AvatarInput([ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move)
         {
             LoadTestScene(SCENE_NAME);
             yield return new WaitForFixedUpdate();
@@ -152,6 +144,13 @@ namespace Tests
 
             Assert.AreEqual(position, avatar.transform.position, $"Avatar should've stopped at position {position}");
         }
+        private IEnumerable<Transform> FindAvatars()
+        {
+            return currentScene
+                .GetRootGameObjects()
+                .SelectMany(obj => obj.GetComponentsInChildren<Transform>())
+                .Where(transform => transform.gameObject.name == AVATAR_NAME);
+        }
         private IEnumerable<(Component, FieldInfo)> FindSpeedFields(Component obj)
         {
             foreach (Component component in obj.GetComponents<Component>())
@@ -167,7 +166,7 @@ namespace Tests
             }
         }
         [UnityTest]
-        public IEnumerator TestAvatarSpeedFieldExists()
+        public IEnumerator T04a_AvatarSpeedFieldExists()
         {
             LoadTestScene(SCENE_NAME);
             yield return new WaitForFixedUpdate();
@@ -177,7 +176,7 @@ namespace Tests
             Assert.AreEqual(1, speedFields.Count(), $"There must be exactly 1 field with the name of '{AVATAR_SPEED_FIELD}' in GameObject '{AVATAR_NAME}'!");
         }
         [UnityTest]
-        public IEnumerator TestAvatarSpeedFieldWorks(
+        public IEnumerator T04b_AvatarSpeedFieldWorks(
             [ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move,
             [ValueSource(nameof(AVATAR_SPEED_VALUES))] float speed,
             [ValueSource(nameof(AVATAR_SPEED_DURATIONS))] int frames)

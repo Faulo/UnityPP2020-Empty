@@ -181,17 +181,17 @@ namespace Tests
         private const float SCENE_TIMEOUT = 5;
 
         [Test]
-        public void TestPrefabExists([ValueSource(nameof(PREFAB_FILES))] string path)
+        public void T06_PrefabExists([ValueSource(nameof(PREFAB_FILES))] string path)
         {
             TestUtils.LoadPrefab(path);
         }
         [Test]
-        public void TestPhysicsMaterialExists([ValueSource(nameof(MATERIAL_FILES))] string path)
+        public void T05a_PhysicsMaterialExists([ValueSource(nameof(MATERIAL_FILES))] string path)
         {
             LoadAsset<PhysicsMaterial2D>(path);
         }
         [Test]
-        public void TestPhysicsMaterialsFriction()
+        public void T05b_PhysicsMaterialsFriction()
         {
             PhysicsMaterial2D icy = LoadAsset<PhysicsMaterial2D>(MATERIAL_ICY);
             PhysicsMaterial2D dflt = LoadAsset<PhysicsMaterial2D>(MATERIAL_DEFAULT);
@@ -200,7 +200,7 @@ namespace Tests
             Assert.Less(dflt.friction, sticky.friction, $"Friction of {dflt} must be lower than friction of {sticky}!");
         }
         [Test]
-        public void TestPlatformPrefab([ValueSource(nameof(PLATFORM_INFOS))] (string, string) info)
+        public void T04_PlatformPrefab([ValueSource(nameof(PLATFORM_INFOS))] (string, string) info)
         {
             GameObject prefab = TestUtils.LoadPrefab(info.Item1);
             PhysicsMaterial2D mat = LoadAsset<PhysicsMaterial2D>(info.Item2);
@@ -210,7 +210,7 @@ namespace Tests
             Assert.Greater(platform.jumpSpeedMultiplier, 0, $"Platform {prefab} should have an {nameof(platform.jumpSpeedMultiplier)} > 0!");
         }
         [Test]
-        public void TestMarioPrefab()
+        public void T02_MarioPrefab()
         {
             GameObject prefab = TestUtils.LoadPrefab(PREFAB_MARIO);
 
@@ -226,7 +226,7 @@ namespace Tests
             Assert.AreEqual(RigidbodyConstraints2D.FreezeRotation, mario.rigidbody.constraints, $"Mario should not be able to rotate!");
         }
         [UnityTest]
-        public IEnumerator TestMarioMovement([ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move)
+        public IEnumerator T03_MarioMovement([ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move)
         {
             yield return new WaitForFixedUpdate();
 
@@ -276,13 +276,13 @@ namespace Tests
             yield return new WaitForFixedUpdate();
         }
         [Test]
-        public void TestSceneExists()
+        public void T07a_SceneExists()
         {
             FileInfo file = new FileInfo(SCENE_PATH);
             FileAssert.Exists(file);
         }
         [UnityTest]
-        public IEnumerator TestPrefabInstancesExistInScene()
+        public IEnumerator T07b_PrefabInstancesExistInScene()
         {
             void validatePlatforms(GameObject prefab, PlatformBridge[] instances)
             {
@@ -389,14 +389,6 @@ namespace Tests
             avatar.rigidbody.mass = 1;
             avatar.rigidbody.drag = 0;
             return avatar;
-        }
-
-        private PlatformBridge InstantiatePlatform(Vector3 position)
-        {
-
-            GameObject prefab = TestUtils.LoadPrefab(PLATFORM_ICE_PREFAB);
-            GameObject instance = InstantiateGameObject(prefab, position, Quaternion.identity);
-            return new PlatformBridge(instance);
         }
     }
 }

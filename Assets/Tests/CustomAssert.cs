@@ -20,4 +20,8 @@ public static class CustomAssert
     {
         Assert.That(actual, Is.EqualTo(expected).Using(Vector3EqualityComparer.Instance), message);
     }
+    public static void AreEqual(Quaternion expected, Quaternion actual, string message)
+    {
+        Assert.That(actual, Is.EqualTo(expected).Using(QuaternionEqualityComparer.Instance), message);
+    }
 }
