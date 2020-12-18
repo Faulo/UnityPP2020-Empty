@@ -45,8 +45,7 @@ namespace Tests
                 }
             }
             Application.logMessageReceived += listener;
-            LoadTestScene(SCENE_NAME);
-            yield return new WaitForFixedUpdate();
+            yield return LoadTestScene(SCENE_NAME);
             Application.logMessageReceived -= listener;
 
             CollectionAssert.AreEqual(new[] { DEBUG_MESSAGE }, messages);
