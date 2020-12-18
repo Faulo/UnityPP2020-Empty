@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/PlatformTest.unity
     guid: a8e5b08930a89ef45b48493fe08c2d04
+  - enabled: 1
+    path: Assets/Scenes/MarioTest.unity
+    guid: 7dff11d3dc78d5d4784fd489fa9ad4cf
   m_configObjects: {}
