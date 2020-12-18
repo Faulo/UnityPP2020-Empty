@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -178,14 +177,13 @@ namespace Tests
             GameObject avatarPrefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
             GameObject platformPrefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
 
-            LoadTestScene(SCENE_NAME);
-            yield return new WaitForFixedUpdate();
+            yield return LoadTestScene(SCENE_NAME);
 
-            AvatarBridge[] avatars = FindPrefabInstances(avatarPrefab)
+            AvatarBridge[] avatars = currentScene.GetPrefabInstances(avatarPrefab)
                 .Select(obj => new AvatarBridge(obj, true))
                 .ToArray();
 
-            PlatformBridge[] platforms = FindPrefabInstances(platformPrefab)
+            PlatformBridge[] platforms = currentScene.GetPrefabInstances(platformPrefab)
                 .Select(obj => new PlatformBridge(obj))
                 .ToArray();
 
@@ -224,12 +222,6 @@ namespace Tests
             Assert.IsTrue(avatar.isGrounded, $"After waiting {SCENE_TIMEOUT}s, avatar should be grounded!");
             Assert.IsNotNull(platform, $"After being grounded, avatar should have collided with a platform!");
             CustomAssert.AreEqual(platform.platformColor, avatar.renderer.material.GetColor(COLOR_KEY), $"After being grounded, avatar's color should have changed to platform's color!");
-        }
-
-        private IEnumerable<GameObject> FindPrefabInstances(GameObject prefab)
-        {
-            return Object.FindObjectsOfType<GameObject>()
-                .Where(obj => obj.name.StartsWith(prefab.name));
         }
 
         private AvatarBridge InstantiateAvatar(Vector3 position)

@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -304,20 +303,19 @@ namespace Tests
             GameObject metalPrefab = TestUtils.LoadPrefab(PLATFORM_METAL_PREFAB);
             GameObject dirtPrefab = TestUtils.LoadPrefab(PLATFORM_DIRT_PREFAB);
 
-            LoadTestScene(SCENE_NAME);
-            yield return new WaitForFixedUpdate();
+            yield return LoadTestScene(SCENE_NAME);
 
-            MarioBridge[] avatars = FindPrefabInstances(avatarPrefab)
+            MarioBridge[] avatars = currentScene.GetPrefabInstances(avatarPrefab)
                 .Select(obj => new MarioBridge(obj, true))
                 .ToArray();
 
-            PlatformBridge[] icePlatforms = FindPrefabInstances(icePrefab)
+            PlatformBridge[] icePlatforms = currentScene.GetPrefabInstances(icePrefab)
                 .Select(obj => new PlatformBridge(obj))
                 .ToArray();
-            PlatformBridge[] metalPlatforms = FindPrefabInstances(metalPrefab)
+            PlatformBridge[] metalPlatforms = currentScene.GetPrefabInstances(metalPrefab)
                 .Select(obj => new PlatformBridge(obj))
                 .ToArray();
-            PlatformBridge[] dirtPlatforms = FindPrefabInstances(dirtPrefab)
+            PlatformBridge[] dirtPlatforms = currentScene.GetPrefabInstances(dirtPrefab)
                 .Select(obj => new PlatformBridge(obj))
                 .ToArray();
 
@@ -372,12 +370,6 @@ namespace Tests
             Assert.IsNotNull(platform, $"After being grounded, avatar should have collided with a platform!");
             Assert.AreEqual(platform.allowedAcceleration, mario.GetCurrentAcceleration(), $"Mario's {nameof(mario.GetCurrentAcceleration)} should have returned Platform's {nameof(platform.allowedAcceleration)}!");
             Assert.AreEqual(platform.jumpSpeedMultiplier * mario.jumpSpeed, mario.GetCurrentJumpSpeed(), $"Mario's {nameof(mario.GetCurrentJumpSpeed)} should have returned Mario's {nameof(mario.jumpSpeed)} multiplied by Platform's {nameof(platform.jumpSpeedMultiplier)}!");
-        }
-
-        private IEnumerable<GameObject> FindPrefabInstances(GameObject prefab)
-        {
-            return UnityEngine.Object.FindObjectsOfType<GameObject>()
-                .Where(obj => obj.name.StartsWith(prefab.name));
         }
 
         private MarioBridge InstantiateMario(Vector3 position)

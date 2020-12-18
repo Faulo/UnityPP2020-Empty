@@ -105,18 +105,16 @@ namespace Tests
         [UnityTest]
         public IEnumerator T03b_AvatarExists()
         {
-            LoadTestScene(SCENE_NAME);
-            yield return new WaitForFixedUpdate();
-            IEnumerable<Transform> avatars = FindAvatars();
+            yield return LoadTestScene(SCENE_NAME);
+            IEnumerable<GameObject> avatars = FindAvatars();
 
             Assert.AreEqual(1, avatars.Count(), $"There must be exactly 1 GameObject with the name of '{AVATAR_NAME}' in scene '{SCENE_NAME}'!");
         }
         [UnityTest]
         public IEnumerator T03c_AvatarInput([ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move)
         {
-            LoadTestScene(SCENE_NAME);
-            yield return new WaitForFixedUpdate();
-            Transform avatar = FindAvatars().First();
+            yield return LoadTestScene(SCENE_NAME);
+            GameObject avatar = FindAvatars().First();
 
             Vector3 target = move.direction;
             avatar.transform.position = Vector3.zero;
@@ -144,14 +142,11 @@ namespace Tests
 
             Assert.AreEqual(position, avatar.transform.position, $"Avatar should've stopped at position {position}");
         }
-        private IEnumerable<Transform> FindAvatars()
+        private IEnumerable<GameObject> FindAvatars()
         {
-            return currentScene
-                .GetRootGameObjects()
-                .SelectMany(obj => obj.GetComponentsInChildren<Transform>())
-                .Where(transform => transform.gameObject.name == AVATAR_NAME);
+            return currentScene.GetObjectsByName(AVATAR_NAME);
         }
-        private IEnumerable<(Component, FieldInfo)> FindSpeedFields(Component obj)
+        private IEnumerable<(Component, FieldInfo)> FindSpeedFields(GameObject obj)
         {
             foreach (Component component in obj.GetComponents<Component>())
             {
@@ -168,9 +163,8 @@ namespace Tests
         [UnityTest]
         public IEnumerator T04a_AvatarSpeedFieldExists()
         {
-            LoadTestScene(SCENE_NAME);
-            yield return new WaitForFixedUpdate();
-            Transform avatar = FindAvatars().First();
+            yield return LoadTestScene(SCENE_NAME);
+            GameObject avatar = FindAvatars().First();
             IEnumerable<(Component, FieldInfo)> speedFields = FindSpeedFields(avatar);
 
             Assert.AreEqual(1, speedFields.Count(), $"There must be exactly 1 field with the name of '{AVATAR_SPEED_FIELD}' in GameObject '{AVATAR_NAME}'!");
@@ -181,9 +175,8 @@ namespace Tests
             [ValueSource(nameof(AVATAR_SPEED_VALUES))] float speed,
             [ValueSource(nameof(AVATAR_SPEED_DURATIONS))] int frames)
         {
-            LoadTestScene(SCENE_NAME);
-            yield return new WaitForFixedUpdate();
-            Transform avatar = FindAvatars().First();
+            yield return LoadTestScene(SCENE_NAME);
+            GameObject avatar = FindAvatars().First();
             (Component speedComponent, FieldInfo speedField) = FindSpeedFields(avatar).First();
 
             speedField.SetValue(speedComponent, speed);

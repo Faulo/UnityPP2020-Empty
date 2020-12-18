@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -258,17 +257,13 @@ namespace Tests
             GameObject platformPrefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
             GameObject avatarPrefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
 
-            LoadTestScene(SCENE_NAME);
-            yield return new WaitForFixedUpdate();
-            (string, GameObject)[] pairs = FindPrefabInstances().ToArray();
+            yield return LoadTestScene(SCENE_NAME);
 
-            GameObject[] avatars = pairs
-                .Where(pair => pair.Item1.StartsWith(avatarPrefab.name))
-                .Select(pair => pair.Item2)
+            GameObject[] avatars = currentScene
+                .GetPrefabInstances(avatarPrefab)
                 .ToArray();
-            GameObject[] platforms = pairs
-                .Where(pair => pair.Item1.StartsWith(platformPrefab.name))
-                .Select(pair => pair.Item2)
+            GameObject[] platforms = currentScene
+                .GetPrefabInstances(platformPrefab)
                 .ToArray();
 
             Assert.AreEqual(SCENE_AVATAR_COUNT, avatars.Length, $"Scene {SCENE_NAME} must have exactly {SCENE_AVATAR_COUNT} instance(s) of prefab {avatarPrefab}!"); ; ;
@@ -294,19 +289,6 @@ namespace Tests
             Assert.IsTrue(avatar.isGrounded, $"After jumping and waiting {SCENE_TIMEOUT}s, avatar should have landed!");
 
             yield return new WaitForFixedUpdate();
-        }
-
-        private IEnumerable<(string, GameObject)> FindPrefabInstances()
-        {
-            IEnumerable<GameObject> instances = currentScene
-                .GetRootGameObjects()
-                .SelectMany(obj => obj.GetComponentsInChildren<Transform>())
-                .Select(t => t.gameObject);
-            foreach (GameObject instance in instances)
-            {
-                yield return (instance.name, instance);
-            }
-
         }
 
         private AvatarBridge InstantiateAvatar(Vector3 position)

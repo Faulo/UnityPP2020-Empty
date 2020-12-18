@@ -56,12 +56,13 @@ namespace Tests
         }
 
         private Scene loadedScene;
-        protected Scene LoadTestScene(string name)
+        protected IEnumerator LoadTestScene(string name)
         {
-            int sceneIndex = SceneManager.sceneCount;
-            SceneManager.LoadScene(name, LoadSceneMode.Additive);
-            loadedScene = SceneManager.GetSceneAt(sceneIndex);
-            return loadedScene;
+            AsyncOperation async = SceneManager.LoadSceneAsync(name, LoadSceneMode.Additive);
+            yield return async;
+            loadedScene = SceneManager.GetSceneByName(name);
+            Assert.IsTrue(loadedScene.IsValid(), $"Scene {name} could not be loaded, help!");
+            yield return new WaitForFixedUpdate();
         }
         protected T LoadAsset<T>(string path) where T : Object
         {

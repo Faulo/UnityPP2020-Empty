@@ -151,7 +151,7 @@ namespace Tests
             yield return new WaitForFixedUpdate();
 
             GameObject particlePrefab = TestUtils.LoadPrefab(PREFAB_PARTICLE);
-            int particleCount = FindPrefabInstances(particlePrefab).Count();
+            int particleCount = currentScene.GetPrefabInstances(particlePrefab).Count();
 
             Collision2D collision = null;
             Vector2 collisionPosition = default;
@@ -185,7 +185,7 @@ namespace Tests
                 Assert.IsFalse(mario.isGrounded, $"{setupText} Mario should not have become grounded, but did!");
             }
 
-            IEnumerable<GameObject> particleInstances = FindPrefabInstances(particlePrefab);
+            IEnumerable<GameObject> particleInstances = currentScene.GetPrefabInstances(particlePrefab);
             Assert.AreEqual(particleCount + 1, particleInstances.Count(), $"{setupText} particles should've spawned, but didn't!");
             ParticleBridge particle = new ParticleBridge(particleInstances.Last());
             loadedObjects.Enqueue(particle.gameObject);
@@ -199,12 +199,6 @@ namespace Tests
             Assert.IsTrue(!particle.gameObject, $"{setupText} spawning particles and waiting {SCENE_TIMEOUT}s, particles should've self-destructed!");
 
             yield return new WaitForFixedUpdate();
-        }
-
-        private IEnumerable<GameObject> FindPrefabInstances(GameObject prefab)
-        {
-            return UnityEngine.Object.FindObjectsOfType<GameObject>()
-                .Where(obj => obj.name.StartsWith(prefab.name));
         }
 
         private MarioBridge InstantiateMario(Vector3 position)
