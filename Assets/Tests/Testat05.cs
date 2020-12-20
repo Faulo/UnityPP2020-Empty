@@ -358,6 +358,7 @@ namespace Tests
 
             MarioBridge mario = avatars[0];
             PlatformBridge platform = default;
+            float startingSpeed = mario.jumpSpeed;
 
             mario.physics.onCollisionEnter += collision =>
             {
@@ -369,7 +370,7 @@ namespace Tests
             Assert.IsTrue(mario.isGrounded, $"After waiting {SCENE_TIMEOUT}s, avatar should be grounded!");
             Assert.IsNotNull(platform, $"After being grounded, avatar should have collided with a platform!");
             Assert.AreEqual(platform.allowedAcceleration, mario.GetCurrentAcceleration(), $"Mario's {nameof(mario.GetCurrentAcceleration)} should have returned Platform's {nameof(platform.allowedAcceleration)}!");
-            Assert.AreEqual(platform.jumpSpeedMultiplier * mario.jumpSpeed, mario.GetCurrentJumpSpeed(), $"Mario's {nameof(mario.GetCurrentJumpSpeed)} should have returned Mario's {nameof(mario.jumpSpeed)} multiplied by Platform's {nameof(platform.jumpSpeedMultiplier)}!");
+            Assert.AreEqual(platform.jumpSpeedMultiplier * startingSpeed, mario.GetCurrentJumpSpeed(), $"Mario's {nameof(mario.GetCurrentJumpSpeed)} should have returned Mario's {nameof(mario.jumpSpeed)} multiplied by Platform's {nameof(platform.jumpSpeedMultiplier)}!");
         }
 
         private MarioBridge InstantiateMario(Vector3 position)
