@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System.Linq;
 using UnityEngine;
 
 namespace Tests
@@ -45,6 +46,15 @@ namespace Tests
         {
             T[] components = gameObject.GetComponentsInChildren<T>();
             Assert.AreEqual(1, components.Length, $"There must be exactly 1 component of type of type '{typeof(T)}' in GameObject '{gameObject}' (or its children)!");
+            return components[0];
+        }
+        protected T FindInterface<T>() where T : class
+        {
+            T[] components = gameObject
+                .GetComponents<Component>()
+                .OfType<T>()
+                .ToArray();
+            Assert.AreEqual(1, components.Length, $"There must be exactly 1 script that implements interface '{typeof(T)}' in GameObject '{gameObject}'!");
             return components[0];
         }
     }
