@@ -123,7 +123,7 @@ namespace Tests
 
             Vector3 position;
 
-            using (new InputPress(move.keys))
+            using (new InputPress(input, move.keys))
             {
                 yield return new WaitForFixedUpdate();
                 position = avatar.transform.position;
@@ -189,7 +189,7 @@ namespace Tests
 
             yield return new WaitForFixedUpdate();
 
-            using (new InputPress(move.keys))
+            using (new InputPress(input, move.keys))
             {
 
                 for (int i = 0; i < frames; i++)

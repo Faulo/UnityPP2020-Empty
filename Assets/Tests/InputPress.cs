@@ -4,10 +4,11 @@ using UnityEngine.InputSystem.Controls;
 
 public class InputPress : IDisposable
 {
-    private readonly InputTestFixture input = new InputTestFixture();
+    private readonly InputTestFixture input;
     private readonly ButtonControl[] controls;
-    public InputPress(params ButtonControl[] controls)
+    public InputPress(InputTestFixture input, params ButtonControl[] controls)
     {
+        this.input = input;
         this.controls = controls;
         foreach (ButtonControl control in controls)
         {

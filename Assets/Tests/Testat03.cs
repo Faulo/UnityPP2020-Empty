@@ -203,7 +203,7 @@ namespace Tests
             float target = avatar.position.x;
             target += move.sign * speed * frames * Time.fixedDeltaTime;
 
-            using (new InputPress(move.key))
+            using (new InputPress(input, move.key))
             {
                 for (int i = 0; i < frames; i++)
                 {
@@ -276,7 +276,7 @@ namespace Tests
             yield return new WaitUntil(() => avatar.isGrounded || Time.time > timeout);
             Assert.IsTrue(avatar.isGrounded, $"After waiting {SCENE_TIMEOUT}s, avatar should be grounded!");
 
-            using (new InputPress(AVATAR_JUMPKEY))
+            using (new InputPress(input, AVATAR_JUMPKEY))
             {
 
                 timeout = Time.time + SCENE_TIMEOUT;

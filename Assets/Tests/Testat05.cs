@@ -244,7 +244,7 @@ namespace Tests
             Assert.AreEqual(0, previousSpeed, "Mario should start with horizontal speed of 0m/s!");
             Assert.AreEqual(move.maximumSpeed, mario.GetCurrentJumpSpeed(), $"In freefall, Mario's jump speed should be {move.maximumSpeed}m/s!");
 
-            using (new InputPress(move.key))
+            using (new InputPress(input, move.key))
             {
                 do
                 {

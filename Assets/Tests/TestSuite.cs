@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
@@ -12,6 +13,19 @@ namespace Tests
 {
     public class TestSuite
     {
+        protected readonly InputTestFixture input = new InputTestFixture();
+        [SetUp]
+        private void Setup()
+        {
+            input.Setup();
+        }
+
+        [TearDown]
+        private void TearDown()
+        {
+            input.TearDown();
+        }
+
         protected Scene currentScene => loadedScene.IsValid()
             ? loadedScene
             : testScene;
