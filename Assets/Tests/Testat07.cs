@@ -82,6 +82,41 @@ namespace Tests
                 }
             }
         }
+        public class PlatformBridge : GameObjectBridge
+        {
+            public float allowedAcceleration
+            {
+                get => allowedAccelerationBridge.value;
+                set => allowedAccelerationBridge.value = value;
+            }
+            private readonly FieldBridge<float> allowedAccelerationBridge;
+            public float jumpSpeedMultiplier
+            {
+                get => jumpSpeedMultiplierBridge.value;
+                set => jumpSpeedMultiplierBridge.value = value;
+            }
+            private readonly FieldBridge<float> jumpSpeedMultiplierBridge;
+
+            public BoxCollider2D collider
+            {
+                get;
+                private set;
+            }
+            public Color rendererColor => renderer.material.color;
+            public Renderer renderer
+            {
+                get;
+                private set;
+            }
+
+            public PlatformBridge(GameObject gameObject) : base(gameObject)
+            {
+                allowedAccelerationBridge = FindField<float>(nameof(allowedAcceleration));
+                jumpSpeedMultiplierBridge = FindField<float>(nameof(jumpSpeedMultiplier));
+                collider = FindComponent<BoxCollider2D>();
+                renderer = FindComponentInChildren<Renderer>();
+            }
+        }
         [Serializable]
         public class Move
         {
@@ -161,11 +196,17 @@ namespace Tests
         [UnityTest]
         public IEnumerator T02a_MarioJumpSpeed([ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move, [ValueSource(nameof(BOOST_SPEEDS))] float jumpSpeed)
         {
-            MarioBridge mario = InstantiateMario(Vector3.zero);
-            mario.rigidbody.gravityScale = 0;
-            yield return new WaitForFixedUpdate();
-            mario.isGrounded = true;
+            MarioBridge mario = InstantiateMario(Vector3.up);
+            mario.isGrounded = false;
             mario.isJumping = false;
+            yield return new WaitForFixedUpdate();
+            var platform = InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
+            platform.jumpSpeedMultiplier = 1;
+            float timeout = Time.time + SCENE_TIMEOUT;
+            yield return new WaitUntil(() => mario.isGrounded || Time.time > timeout);
+            yield return new WaitForFixedUpdate();
+            Assert.IsTrue(mario.isGrounded, $"Mario's should've become grounded, but didn't!");
+
             mario.jumpSpeed = jumpSpeed;
             Vector2 velocity = mario.rigidbody.velocity;
 
@@ -173,17 +214,24 @@ namespace Tests
             {
                 yield return new WaitForFixedUpdate();
                 float deltaY = mario.rigidbody.velocity.y - velocity.y;
-                Assert.AreEqual(jumpSpeed, deltaY, $"With input {move}, Mario's Rigidbody2D's vertical velocity should become about equal to his '{nameof(mario.jumpSpeed)}'!");
+                Assert.LessOrEqual(deltaY, jumpSpeed, $"With input {move}, Mario's Rigidbody2D's vertical velocity should become about equal to his '{nameof(mario.jumpSpeed)}'!");
             }
         }
 
         [UnityTest]
         public IEnumerator T02b_MarioForwardBoost([ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move, [ValueSource(nameof(BOOST_SPEEDS))] float jumpForwardBoost)
         {
-            MarioBridge mario = InstantiateMario(Vector3.zero);
-            yield return new WaitForFixedUpdate();
-            mario.isGrounded = true;
+            MarioBridge mario = InstantiateMario(Vector3.up);
+            mario.isGrounded = false;
             mario.isJumping = false;
+            yield return new WaitForFixedUpdate();
+            var platform = InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
+            platform.jumpSpeedMultiplier = 1;
+            float timeout = Time.time + SCENE_TIMEOUT;
+            yield return new WaitUntil(() => mario.isGrounded || Time.time > timeout);
+            yield return new WaitForFixedUpdate();
+            Assert.IsTrue(mario.isGrounded, $"Mario's should've become grounded, but didn't!");
+
             mario.jumpForwardBoost = jumpForwardBoost;
             Vector2 velocity = mario.rigidbody.velocity;
 
@@ -209,10 +257,17 @@ namespace Tests
         {
             Keyboard keyboard = Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
 
-            MarioBridge mario = InstantiateMario(Vector3.zero);
-            yield return new WaitForFixedUpdate();
-            mario.isGrounded = true;
+            MarioBridge mario = InstantiateMario(Vector3.up);
+            mario.isGrounded = false;
             mario.isJumping = false;
+            yield return new WaitForFixedUpdate();
+            var platform = InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
+            platform.jumpSpeedMultiplier = 1;
+            float timeout = Time.time + SCENE_TIMEOUT;
+            yield return new WaitUntil(() => mario.isGrounded || Time.time > timeout);
+            yield return new WaitForFixedUpdate();
+            Assert.IsTrue(mario.isGrounded, $"Mario's should've become grounded, but didn't!");
+
             mario.jumpSpeed = jumpSpeed;
             mario.jumpStopSpeed = jumpStopSpeed;
 
@@ -220,7 +275,7 @@ namespace Tests
             {
                 yield return new WaitForFixedUpdate();
                 Assert.IsTrue(mario.isJumping, $"After pressing space, Mario's {nameof(mario.isJumping)}' should have become true!");
-                float timeout = Time.time + SCENE_TIMEOUT;
+                timeout = Time.time + SCENE_TIMEOUT;
                 yield return new WaitUntil(() => !mario.isJumping || Time.time > timeout);
                 Assert.IsFalse(mario.isJumping, $"After waiting {SCENE_TIMEOUT}s, Mario should have stopped jumping!");
                 Assert.LessOrEqual(mario.rigidbody.velocity.y, jumpStopSpeed, $"When stopping to jump, Mario's Rigidbody's vertical velocity should be less than his '{nameof(mario.jumpStopSpeed)}'!");
@@ -228,35 +283,21 @@ namespace Tests
         }
 
         [UnityTest]
-        public IEnumerator T03c_PressSpaceWhileAirborne([ValueSource(nameof(JUMP_SPEEDS))] float jumpSpeed, [ValueSource(nameof(JUMP_STOP_SPEEDS))] float jumpStopSpeed)
-        {
-            Keyboard keyboard = Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
-
-            MarioBridge mario = InstantiateMario(Vector3.zero);
-            yield return new WaitForFixedUpdate();
-            mario.isGrounded = false;
-            mario.isJumping = false;
-            mario.jumpSpeed = jumpSpeed;
-            mario.jumpStopSpeed = jumpStopSpeed;
-
-            using (new InputPress(input, new[] { keyboard.spaceKey }))
-            {
-                yield return new WaitForFixedUpdate();
-                Assert.IsFalse(mario.isJumping, $"After pressing space while airborne, Mario's {nameof(mario.isJumping)}' should have stayed false!");
-            }
-            yield return new WaitForFixedUpdate();
-            Assert.IsFalse(mario.isJumping, $"After pressing space while airborne, Mario's {nameof(mario.isJumping)}' should have stayed false!");
-        }
-
-        [UnityTest]
         public IEnumerator T03b_TapSpaceBriefly([ValueSource(nameof(JUMP_SPEEDS))] float jumpSpeed, [ValueSource(nameof(JUMP_STOP_SPEEDS))] float jumpStopSpeed)
         {
             Keyboard keyboard = Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
 
-            MarioBridge mario = InstantiateMario(Vector3.zero);
-            yield return new WaitForFixedUpdate();
-            mario.isGrounded = true;
+            MarioBridge mario = InstantiateMario(Vector3.up);
+            mario.isGrounded = false;
             mario.isJumping = false;
+            yield return new WaitForFixedUpdate();
+            var platform = InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
+            platform.jumpSpeedMultiplier = 1;
+            float timeout = Time.time + SCENE_TIMEOUT;
+            yield return new WaitUntil(() => mario.isGrounded || Time.time > timeout);
+            yield return new WaitForFixedUpdate();
+            Assert.IsTrue(mario.isGrounded, $"Mario's should've become grounded, but didn't!");
+
             mario.jumpSpeed = jumpSpeed;
             mario.jumpStopSpeed = jumpStopSpeed;
 
@@ -268,6 +309,28 @@ namespace Tests
             yield return new WaitForFixedUpdate();
             Assert.IsFalse(mario.isJumping, $"After releasing space, Mario should have stopped jumping!");
             Assert.LessOrEqual(mario.rigidbody.velocity.y, jumpStopSpeed, $"When stopping to jump, Mario's Rigidbody's vertical velocity should be less than his '{nameof(mario.jumpStopSpeed)}'!");
+        }
+
+        [UnityTest]
+        public IEnumerator T03c_PressSpaceWhileAirborne([ValueSource(nameof(JUMP_SPEEDS))] float jumpSpeed, [ValueSource(nameof(JUMP_STOP_SPEEDS))] float jumpStopSpeed)
+        {
+            Keyboard keyboard = Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
+
+            MarioBridge mario = InstantiateMario(Vector3.up);
+            mario.isGrounded = false;
+            mario.isJumping = false;
+            yield return new WaitForFixedUpdate();
+
+            mario.jumpSpeed = jumpSpeed;
+            mario.jumpStopSpeed = jumpStopSpeed;
+
+            using (new InputPress(input, new[] { keyboard.spaceKey }))
+            {
+                yield return new WaitForFixedUpdate();
+                Assert.IsFalse(mario.isJumping, $"After pressing space while airborne, Mario's {nameof(mario.isJumping)}' should have stayed false!");
+            }
+            yield return new WaitForFixedUpdate();
+            Assert.IsFalse(mario.isJumping, $"After pressing space while airborne, Mario's {nameof(mario.isJumping)}' should have stayed false!");
         }
 
         [Test]
@@ -346,6 +409,13 @@ namespace Tests
             GameObject prefab = TestUtils.LoadPrefab(PREFAB_MARIO);
             GameObject instance = InstantiateGameObject(prefab, position, Quaternion.identity);
             return new MarioBridge(instance, true);
+        }
+        private PlatformBridge InstantiatePlatform(Vector3 position, string prefabFile)
+        {
+
+            GameObject prefab = TestUtils.LoadPrefab(prefabFile);
+            GameObject instance = InstantiateGameObject(prefab, position, Quaternion.identity);
+            return new PlatformBridge(instance);
         }
     }
 }
