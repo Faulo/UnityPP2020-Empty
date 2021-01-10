@@ -118,6 +118,8 @@ namespace Tests
         {
             GameObject prefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
             PlatformBridge platform = new PlatformBridge(prefab);
+            Assert.IsNotNull(platform.collider, $"'{PLATFORM_PREFAB}' needs a Collider2D!");
+            Assert.IsNotNull(platform.renderer, $"'{PLATFORM_PREFAB}' needs a Renderer!");
             CustomAssert.AreEqual(Vector2.zero, platform.collider.offset, $"Platform's Collider2D must have an offset of {Vector2.zero}, but was {platform.collider.offset}!");
             CustomAssert.AreEqual(Vector2.one, platform.collider.size, $"Platform's Collider2D must have an offset of {Vector2.one}, but was {platform.collider.size}!");
             Assert.AreEqual(LoadAsset<Material>(PLATFORM_MATERIAL), platform.renderer.sharedMaterial, $"Platform's renderer must use Platform material!");
@@ -143,6 +145,8 @@ namespace Tests
             GameObject prefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
 
             AvatarBridge avatar = new AvatarBridge(prefab);
+            Assert.IsNotNull(avatar.rigidbody, $"'{AVATAR_PREFAB}' needs a Rigidbody2D!");
+            Assert.IsNotNull(avatar.collider, $"'{AVATAR_PREFAB}' needs a Collider2D!");
             CustomAssert.AreEqual(Vector2.zero, avatar.collider.offset, $"Avatar's Collider2D must have an offset of {Vector2.zero}, but was {avatar.collider.offset}!");
             CustomAssert.AreEqual(Vector2.one, avatar.collider.size, $"Avatar's Collider2D must have an offset of {Vector2.one}, but was {avatar.collider.size}!");
             Assert.AreEqual(RigidbodyType2D.Dynamic, avatar.rigidbody.bodyType, $"Avatar must have a Dynamic body type!");

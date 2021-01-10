@@ -186,6 +186,7 @@ namespace Tests
         public void T01_VerifyMarioPrefab()
         {
             MarioBridge mario = LoadMarioPrefab();
+            Assert.IsNotNull(mario.rigidbody, $"'{PREFAB_MARIO}' needs a Rigidbody2D!");
             Assert.AreEqual(1, mario.rigidbody.gravityScale, "Mario's Rigidbody's gravity scale should be 1!");
             Assert.IsFalse(mario.rigidbody.isKinematic, "Mario's Rigidbody's must not be kinematic!");
             Assert.Greater(mario.jumpForwardBoost, 0, $"Mario's {nameof(mario.jumpForwardBoost)} should be greater than zero!");
@@ -200,7 +201,7 @@ namespace Tests
             mario.isGrounded = false;
             mario.isJumping = false;
             yield return new WaitForFixedUpdate();
-            var platform = InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
+            PlatformBridge platform = InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
             platform.jumpSpeedMultiplier = 1;
             float timeout = Time.time + SCENE_TIMEOUT;
             yield return new WaitUntil(() => mario.isGrounded || Time.time > timeout);
@@ -225,7 +226,7 @@ namespace Tests
             mario.isGrounded = false;
             mario.isJumping = false;
             yield return new WaitForFixedUpdate();
-            var platform = InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
+            PlatformBridge platform = InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
             platform.jumpSpeedMultiplier = 1;
             float timeout = Time.time + SCENE_TIMEOUT;
             yield return new WaitUntil(() => mario.isGrounded || Time.time > timeout);
@@ -261,7 +262,7 @@ namespace Tests
             mario.isGrounded = false;
             mario.isJumping = false;
             yield return new WaitForFixedUpdate();
-            var platform = InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
+            PlatformBridge platform = InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
             platform.jumpSpeedMultiplier = 1;
             float timeout = Time.time + SCENE_TIMEOUT;
             yield return new WaitUntil(() => mario.isGrounded || Time.time > timeout);
@@ -291,7 +292,7 @@ namespace Tests
             mario.isGrounded = false;
             mario.isJumping = false;
             yield return new WaitForFixedUpdate();
-            var platform = InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
+            PlatformBridge platform = InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
             platform.jumpSpeedMultiplier = 1;
             float timeout = Time.time + SCENE_TIMEOUT;
             yield return new WaitUntil(() => mario.isGrounded || Time.time > timeout);
@@ -338,7 +339,8 @@ namespace Tests
         {
             GameObject marioPrefab = TestUtils.LoadPrefab(PREFAB_MARIO);
             MarioBridge mario = new MarioBridge(marioPrefab);
-            Assert.IsNotNull(mario.iColorable, $"Mario '{PREFAB_MARIO}' must contain a script that implements {nameof(IColorable)}!");
+            Assert.IsNotNull(mario.renderer, $"'{PREFAB_MARIO}' needs a Renderer!");
+            Assert.IsNotNull(mario.iColorable, $"'{PREFAB_MARIO}' must contain a script that implements {nameof(IColorable)}!");
         }
         [UnityTest]
         public IEnumerator T04b_IColorarableWorks([ValueSource(nameof(MARIO_COLORS))] (Color, Color, Color) colors)

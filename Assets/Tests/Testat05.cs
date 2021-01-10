@@ -204,6 +204,8 @@ namespace Tests
             GameObject prefab = TestUtils.LoadPrefab(info.Item1);
             PhysicsMaterial2D mat = LoadAsset<PhysicsMaterial2D>(info.Item2);
             PlatformBridge platform = new PlatformBridge(prefab);
+            Assert.IsNotNull(platform.collider, $"'{info.Item1}' needs a Collider2D!");
+            Assert.IsNotNull(platform.renderer, $"'{info.Item1}' needs a Renderer!");
             Assert.AreEqual(mat, platform.collider.sharedMaterial, $"Platform {prefab} should use physics material {mat}!");
             Assert.Greater(platform.allowedAcceleration, 0, $"Platform {prefab} should have an {nameof(platform.allowedAcceleration)} > 0!");
             Assert.Greater(platform.jumpSpeedMultiplier, 0, $"Platform {prefab} should have an {nameof(platform.jumpSpeedMultiplier)} > 0!");
@@ -214,13 +216,15 @@ namespace Tests
             GameObject prefab = TestUtils.LoadPrefab(PREFAB_MARIO);
 
             MarioBridge mario = new MarioBridge(prefab);
+            Assert.IsNotNull(mario.rigidbody, $"'{PREFAB_MARIO}' needs a Rigidbody2D!");
+            Assert.IsNotNull(mario.collider, $"'{PREFAB_MARIO}' needs a Collider2D!");
             Vector2 targetOffset = new Vector2(0, 0);
             Vector2 targetSize = new Vector2(1, 2);
             Assert.AreNotEqual(mario.gameObject, mario.renderer.gameObject, $"Mario's Renderer should be on its own GameObject, as a child of Mario's prefab!");
             CustomAssert.AreEqual(Vector3.one, mario.transform.localScale, $"Mario's Transform must have an scale of {Vector3.one}!");
             CustomAssert.AreEqual(targetOffset, mario.collider.offset, $"Mario's Collider2D must have an offset of {targetOffset}!");
             CustomAssert.AreEqual(targetSize, mario.collider.size, $"Mario's Collider2D must have an size of {targetSize}!");
-            CustomAssert.AreEqual(targetSize, (Vector2)mario.renderer.transform.localScale, $"Mario's Renderer's Transform must have an scale of {targetSize}!");
+            // CustomAssert.AreEqual(targetSize, (Vector2)mario.renderer.transform.localScale, $"Mario's Renderer's Transform must have an scale of {targetSize}!");
             Assert.AreEqual(RigidbodyType2D.Dynamic, mario.rigidbody.bodyType, $"Mario must have a Dynamic body type!");
             Assert.AreEqual(RigidbodyConstraints2D.FreezeRotation, mario.rigidbody.constraints, $"Mario should not be able to rotate!");
         }

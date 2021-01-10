@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 namespace Tests
@@ -36,26 +35,23 @@ namespace Tests
         {
             return new MethodBridge<T>(gameObject, name, parameterCount, returnType);
         }
-        protected T FindComponent<T>() where T : Component
+        protected T FindComponent<T>()
+            where T : Component
         {
-            T[] components = gameObject.GetComponents<T>();
-            Assert.AreEqual(1, components.Length, $"There must be exactly 1 component of type of type '{typeof(T)}' in GameObject '{gameObject}'!");
-            return components[0];
+            return gameObject.GetComponent<T>();
         }
-        protected T FindComponentInChildren<T>() where T : Component
+        protected T FindComponentInChildren<T>()
+            where T : Component
         {
-            T[] components = gameObject.GetComponentsInChildren<T>();
-            Assert.AreEqual(1, components.Length, $"There must be exactly 1 component of type of type '{typeof(T)}' in GameObject '{gameObject}' (or its children)!");
-            return components[0];
+            return gameObject.GetComponentInChildren<T>();
         }
-        protected T FindInterface<T>() where T : class
+        protected T FindInterface<T>()
+            where T : class
         {
-            T[] components = gameObject
+            return gameObject
                 .GetComponents<Component>()
                 .OfType<T>()
-                .ToArray();
-            Assert.AreEqual(1, components.Length, $"There must be exactly 1 script that implements interface '{typeof(T)}' in GameObject '{gameObject}'!");
-            return components[0];
+                .FirstOrDefault();
         }
     }
 }

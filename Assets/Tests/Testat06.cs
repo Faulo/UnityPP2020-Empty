@@ -118,6 +118,7 @@ namespace Tests
             GameObject prefab = TestUtils.LoadPrefab(path);
 
             ParticleBridge particle = new ParticleBridge(prefab);
+            Assert.IsNotNull(particle.particleSystem, $"'{PREFAB_PARTICLE}' needs a ParticleSystem!");
             Assert.IsFalse(particle.particleSystemMain.loop, $"Particle prefab '{path}' must not loop!");
             Assert.IsNotNull(particle.particleSystemRenderer.sharedMaterial, $"Particle prefab '{path}' requires a material!");
             Assert.IsNotNull(particle.particleSystemRenderer.sharedMaterial.shader, $"Particle prefab '{path}' material's requires a shader!");
