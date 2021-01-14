@@ -18,6 +18,7 @@ namespace Tests
         private void Setup()
         {
             input.Setup();
+            InputSystem.settings.updateMode = InputSettings.UpdateMode.ProcessEventsManually;
         }
 
         [TearDown]

@@ -49,6 +49,12 @@ namespace Tests
                 set => defaultAccelerationBridge.value = value;
             }
             private readonly FieldBridge<float> defaultAccelerationBridge;
+            public float maximumSpeed
+            {
+                get => maximumSpeedBridge.value;
+                set => maximumSpeedBridge.value = value;
+            }
+            private readonly FieldBridge<float> maximumSpeedBridge;
 
             public IColorable iColorable
             {
@@ -80,6 +86,7 @@ namespace Tests
                 jumpForwardBoostBridge = FindField<float>(nameof(jumpForwardBoost));
                 jumpStopSpeedBridge = FindField<float>(nameof(jumpStopSpeed));
                 defaultAccelerationBridge = FindField<float>(nameof(defaultAcceleration));
+                maximumSpeedBridge = FindField<float>(nameof(maximumSpeed));
                 iColorable = FindInterface<IColorable>();
                 renderer = FindComponentInChildren<Renderer>();
                 rigidbody = FindComponentInChildren<Rigidbody2D>();
@@ -388,9 +395,16 @@ namespace Tests
             InstantiateMario(Vector3.up);
             mario.isGrounded = false;
             mario.isJumping = false;
+            mario.defaultAcceleration = 20;
+            mario.maximumSpeed = 3;
+            mario.jumpSpeed = 4;
+            mario.jumpStopSpeed = 2;
+            mario.jumpForwardBoost = 1;
             InstantiatePlatform(Vector3.down, PREFAB_PLATFORM_DIRT);
             platform.jumpSpeedMultiplier = 1;
             platform.allowedAcceleration = mario.defaultAcceleration;
+            platform.collider.sharedMaterial = null;
+            platform.collider.size = new Vector2(100, 1);
             float timeout = Time.time + SCENE_TIMEOUT;
             yield return new WaitUntil(() => mario.isGrounded || Time.time > timeout);
             yield return new WaitForFixedUpdate();
