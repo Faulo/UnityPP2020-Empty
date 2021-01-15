@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class MarioController : MonoBehaviour
+public class MarioController : MonoBehaviour, IColorable
 {
     public bool isJumping = false;
     public bool isGrounded = false;
@@ -55,7 +55,7 @@ public class MarioController : MonoBehaviour
         var velocity = attachedRigidbody.velocity;
 
         // acceleration means adding a difference of velocity
-        velocity.x += movementAction.ReadValue<float>() * GetCurrentAcceleration() * Time.deltaTime;
+        velocity.x += movement * GetCurrentAcceleration() * Time.deltaTime;
 
         // velocity must not exceed maximumSpeed
         if (velocity.x > maximumSpeed)
@@ -70,7 +70,25 @@ public class MarioController : MonoBehaviour
         // if grounded, we can jump
         if (isGrounded && jumpAction.phase == InputActionPhase.Started)
         {
+            // Sobald die Sprungtaste gedrückt wird, soll nach wie vor Mario’s vertikaleGeschwindigkeit auf ​jumpSpeed​ gesetzt werden
             velocity.y = GetCurrentJumpSpeed();
+
+            // Außerdem soll seine horizontale Geschwindigkeit um einen Betrag erhöhtwerden, der dem Feld ​jumpForwardBoost​ entspricht.
+            velocity.x += jumpForwardBoost * movement;
+
+            // Das Feld ​isJumping​ soll angeben, ob sich Mario gerade in derAufwärtsbewegung seines Sprunges befindet.
+            isJumping = true;
+        }
+        if (isJumping && jumpAction.phase != InputActionPhase.Started)
+        {
+            // Sollte während des Sprunges die Sprungtaste losgelassen werden, sollMario’s vertikale Geschwindigkeit den Wert des Feldes ​jumpStopSpeedannehmen und ​isJumping​ soll auf ​false​ gesetzt werden.
+            isJumping = false;
+            velocity.y = jumpStopSpeed;
+        }
+        if (isJumping && velocity.y < jumpStopSpeed)
+        {
+            // Ansonsten soll ​isJumping​ auch dann auf ​false​ gesetzt werden, wennMario’s aktuelle vertikale Geschwindigkeit unterhalb ​jumpStopSpeedfällt.
+            isJumping = false;
         }
 
         // if grounded, we can crouch
@@ -145,5 +163,38 @@ public class MarioController : MonoBehaviour
         {
             isGrounded = false;
         }
+    }
+
+    private Color groundedColor = Color.white;
+    private Color jumpingColor = Color.white;
+    private Color fallingColor = Color.white;
+    public void SetColors(Color groundedColor, Color jumpingColor, Color fallingColor)
+    {
+        // Die Methode ​SetColors​ legt die 3 Farben ​groundedColor​,jumpingColor​ und ​fallingColor​ fest, die Mario zur Einfärbungzur Verfügung stehen. Legen Sie für diese Farben geeignete Felderan.
+        this.groundedColor = groundedColor;
+        this.jumpingColor = jumpingColor;
+        this.fallingColor = fallingColor;
+    }
+
+    public Color GetCurrentColor()
+    {
+        if (isGrounded)
+        {
+            // Berührt Mario gerade den Boden (​isGrounded​ ist ​true​), gibgroundedColor​ zurück.
+            return groundedColor;
+        }
+        if (isJumping)
+        {
+            // Ansonsten, wenn Mario gerade springt (​isJumping​ ist ​true​),gib ​jumpingColor​ zurück.
+            return jumpingColor;
+        }
+        // Ansonsten gib ​fallingColor​ zurück.
+        return fallingColor;
+    }
+
+    private void Update()
+    {
+        // Implementieren Sie außerdem eine ​Update​ Methode, die die Farbe vonMario’s ​MeshRenderer​ kontinuierlich (und mittels ​GetCurrentColor​)aktualisiert.
+        attachedRenderer.material.color = GetCurrentColor();
     }
 }
