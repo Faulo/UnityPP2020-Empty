@@ -3,34 +3,54 @@ using UnityEngine.InputSystem;
 
 public class MarioController : MonoBehaviour
 {
+    public bool isJumping = false;
     public bool isGrounded = false;
     public float maximumSpeed = 5;
     public float jumpSpeed = 5;
+    public float jumpForwardBoost = 1;
+    public float jumpStopSpeed = 5;
     public float defaultAcceleration = 20;
     public InputAction movementAction = default;
+    public float movement;
     public InputAction jumpAction = default;
+    public InputAction crouchAction = default;
+    public bool isCrouching = false;
     public GameObject contactParticlesPrefab;
 
-    private Rigidbody2D attachedRigidbody;
+    public Rigidbody2D attachedRigidbody;
+    public SpriteRenderer attachedRenderer;
     private MarioPlatform lastPlatform;
 
     private void Start()
     {
         attachedRigidbody = GetComponent<Rigidbody2D>();
+        attachedRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     private void OnEnable()
     {
         movementAction.Enable();
         jumpAction.Enable();
+        crouchAction.Enable();
     }
     private void OnDisable()
     {
         movementAction.Disable();
         jumpAction.Disable();
+        crouchAction.Disable();
     }
     private void FixedUpdate()
     {
+        movement = movementAction.ReadValue<float>();
+        if (movement > 0)
+        {
+            attachedRenderer.flipX = false;
+        }
+        if (movement < 0)
+        {
+            attachedRenderer.flipX = true;
+        }
+
         // first, store the current velocity for modification
         var velocity = attachedRigidbody.velocity;
 
@@ -51,6 +71,16 @@ public class MarioController : MonoBehaviour
         if (isGrounded && jumpAction.phase == InputActionPhase.Started)
         {
             velocity.y = GetCurrentJumpSpeed();
+        }
+
+        // if grounded, we can crouch
+        if (isGrounded && crouchAction.phase == InputActionPhase.Started)
+        {
+            isCrouching = true;
+        }
+        else
+        {
+            isCrouching = false;
         }
 
         // write velocity back to rigidbody
