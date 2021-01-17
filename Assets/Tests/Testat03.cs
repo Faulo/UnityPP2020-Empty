@@ -1,58 +1,49 @@
-﻿using NUnit.Framework;
-using System.Collections;
+﻿using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.TestTools;
 
-namespace Tests
-{
-    public class Testat03 : TestSuite
-    {
-        private class AvatarBridge : GameObjectBridge
-        {
-            public bool isGrounded
-            {
+namespace Tests {
+    public class Testat03 : TestSuite {
+        class AvatarBridge : GameObjectBridge {
+            public bool isGrounded {
                 get => isGroundedBridge.value;
                 set => isGroundedBridge.value = value;
             }
-            private readonly FieldBridge<bool> isGroundedBridge;
+            readonly FieldBridge<bool> isGroundedBridge;
 
-            public float movementSpeed
-            {
+            public float movementSpeed {
                 get => movementSpeedBridge.value;
                 set => movementSpeedBridge.value = value;
             }
-            private readonly FieldBridge<float> movementSpeedBridge;
+            readonly FieldBridge<float> movementSpeedBridge;
 
-            public float jumpSpeed
-            {
+            public float jumpSpeed {
                 get => jumpSpeedBridge.value;
                 set => jumpSpeedBridge.value = value;
             }
-            private readonly FieldBridge<float> jumpSpeedBridge;
+            readonly FieldBridge<float> jumpSpeedBridge;
 
             public InputAction movementAction => movementActionBridge.value;
-            private readonly FieldBridge<InputAction> movementActionBridge;
+            readonly FieldBridge<InputAction> movementActionBridge;
             public InputAction jumpAction => jumpActionBridge.value;
-            private readonly FieldBridge<InputAction> jumpActionBridge;
+            readonly FieldBridge<InputAction> jumpActionBridge;
 
-            public Rigidbody2D rigidbody
-            {
+            public Rigidbody2D rigidbody {
                 get;
                 private set;
             }
-            public BoxCollider2D collider
-            {
+            public BoxCollider2D collider {
                 get;
                 private set;
             }
 
-            public AvatarBridge(GameObject gameObject) : base(gameObject)
-            {
+            public AvatarBridge(GameObject gameObject) : base(gameObject) {
                 isGroundedBridge = FindField<bool>(nameof(isGrounded));
                 movementSpeedBridge = FindField<float>(nameof(movementSpeed));
                 jumpSpeedBridge = FindField<float>(nameof(jumpSpeed));
@@ -62,54 +53,46 @@ namespace Tests
                 collider = FindComponent<BoxCollider2D>();
             }
         }
-        public class PlatformBridge : GameObjectBridge
-        {
-            public BoxCollider2D collider
-            {
+        public class PlatformBridge : GameObjectBridge {
+            public BoxCollider2D collider {
                 get;
                 private set;
             }
 
-            public PlatformBridge(GameObject gameObject) : base(gameObject)
-            {
+            public PlatformBridge(GameObject gameObject) : base(gameObject) {
                 collider = FindComponent<BoxCollider2D>();
             }
         }
         [System.Serializable]
-        public class Move
-        {
+        public class Move {
             public KeyControl key;
             public int sign;
-            public override string ToString()
-            {
+            public override string ToString() {
                 return key.name;
             }
         }
 
-        private const string PROJECT_PATH = ".";
-        private static readonly Regex SPLIT_PATTERN = new Regex(@"\s+");
-        private static readonly string[] GIT_TAGS = new[] { "Tx01", "Tx02" };
+        const string PROJECT_PATH = ".";
+        static readonly Regex SPLIT_PATTERN = new Regex(@"\s+");
+        static readonly string[] GIT_TAGS = new[] { "Tx01", "Tx02" };
 
-        private static string[] PREFAB_FILES => new[] { AVATAR_PREFAB, PLATFORM_PREFAB };
-        private static readonly string AVATAR_PREFAB = "Assets/Prefabs/Avatar.prefab";
-        private static readonly string PLATFORM_PREFAB = "Assets/Prefabs/Platform.prefab";
+        static string[] PREFAB_FILES => new[] { AVATAR_PREFAB, PLATFORM_PREFAB };
+        static readonly string AVATAR_PREFAB = "Assets/Prefabs/Avatar.prefab";
+        static readonly string PLATFORM_PREFAB = "Assets/Prefabs/Platform.prefab";
 
-        private static readonly float[] AVATAR_SPEED_VALUES = new[] { 0, 5f };
-        private static readonly int[] AVATAR_SPEED_DURATIONS = new[] { 2, 8 };
-        private static KeyControl AVATAR_JUMPKEY => Keyboard.current.spaceKey;
+        static readonly float[] AVATAR_SPEED_VALUES = new[] { 0, 5f };
+        static readonly int[] AVATAR_SPEED_DURATIONS = new[] { 2, 8 };
+        static KeyControl AVATAR_JUMPKEY => Keyboard.current.spaceKey;
 
-        private const string SCENE_PATH = "./Assets/Scenes/PlatformTest.unity";
-        private const string SCENE_NAME = "PlatformTest";
-        private const int SCENE_AVATAR_COUNT = 1;
-        private const int SCENE_PLATFORM_COUNT = 5;
-        private const float SCENE_TIMEOUT = 5;
-        private static Move[] MOVEMENT_DIRECTIONS
-        {
-            get
-            {
-                Keyboard keyboard = Keyboard.current;
-                if (keyboard == null)
-                {
+        const string SCENE_PATH = "./Assets/Scenes/PlatformTest.unity";
+        const string SCENE_NAME = "PlatformTest";
+        const int SCENE_AVATAR_COUNT = 1;
+        const int SCENE_PLATFORM_COUNT = 5;
+        const float SCENE_TIMEOUT = 5;
+        static Move[] MOVEMENT_DIRECTIONS {
+            get {
+                var keyboard = Keyboard.current;
+                if (keyboard == null) {
                     keyboard = InputSystem.AddDevice<Keyboard>();
                 }
                 return new[]
@@ -120,47 +103,41 @@ namespace Tests
             }
         }
         [Test]
-        public void T02_GitTagExists([ValueSource(nameof(GIT_TAGS))] string tag)
-        {
-            DirectoryInfo directory = new DirectoryInfo(PROJECT_PATH);
+        public void T02_GitTagExists([ValueSource(nameof(GIT_TAGS))] string tag) {
+            var directory = new DirectoryInfo(PROJECT_PATH);
             string tags = TestUtils.RunGitCommand(directory.FullName, "tag");
             Assert.AreNotEqual("", tags, "No git tags found!");
             CollectionAssert.Contains(SPLIT_PATTERN.Split(tags), tag);
         }
         [Test]
-        public void T03_PrefabExists([ValueSource(nameof(PREFAB_FILES))] string path)
-        {
-            FileInfo file = new FileInfo(path);
+        public void T03_PrefabExists([ValueSource(nameof(PREFAB_FILES))] string path) {
+            var file = new FileInfo(path);
             FileAssert.Exists(file);
         }
         [Test]
-        public void T04a_PlatformPrefab()
-        {
-            GameObject prefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
-            PlatformBridge platform = new PlatformBridge(prefab);
+        public void T04a_PlatformPrefab() {
+            var prefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
+            var platform = new PlatformBridge(prefab);
             Assert.IsNotNull(platform.collider, $"'{PLATFORM_PREFAB}' needs a Collider2D!");
             Assert.IsTrue(TestUtils.Approximately(Vector2.zero, platform.collider.offset), $"Platform's Collider2D must have an offset of {Vector2.zero}, but was {platform.collider.offset}!");
             Assert.IsTrue(TestUtils.Approximately(Vector2.one, platform.collider.size), $"Platform's Collider2D must have an offset of {Vector2.one}, but was {platform.collider.size}!");
         }
         [UnityTest]
-        public IEnumerator T04b_PlatformGravity()
-        {
+        public IEnumerator T04b_PlatformGravity() {
             yield return new WaitForFixedUpdate();
 
-            PlatformBridge platform = InstantiatePlatform(Vector3.zero);
-            for (int i = 0; i < 10; i++)
-            {
+            var platform = InstantiatePlatform(Vector3.zero);
+            for (int i = 0; i < 10; i++) {
                 yield return new WaitForFixedUpdate();
                 Assert.IsTrue(TestUtils.Approximately(Vector3.zero, platform.position), "Platform should not move, ever!");
             }
             Object.Destroy(platform.gameObject);
         }
         [Test]
-        public void T05a_AvatarPrefab()
-        {
-            GameObject prefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
+        public void T05a_AvatarPrefab() {
+            var prefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
 
-            AvatarBridge avatar = new AvatarBridge(prefab);
+            var avatar = new AvatarBridge(prefab);
             Assert.IsNotNull(avatar.rigidbody, $"'{AVATAR_PREFAB}' needs a Rigidbody2D!");
             Assert.IsNotNull(avatar.collider, $"'{AVATAR_PREFAB}' needs a Collider2D!");
             Assert.IsTrue(TestUtils.Approximately(Vector2.zero, avatar.collider.offset), $"Avatar's Collider2D must have an offset of {Vector2.zero}, but was {avatar.collider.offset}!");
@@ -168,16 +145,14 @@ namespace Tests
             Assert.AreEqual(RigidbodyType2D.Dynamic, avatar.rigidbody.bodyType, $"Avatar must have a Dynamic body type!");
         }
         [UnityTest]
-        public IEnumerator T05b_AvatarGravityWhenFalling()
-        {
+        public IEnumerator T05b_AvatarGravityWhenFalling() {
             yield return new WaitForFixedUpdate();
 
-            AvatarBridge avatar = InstantiateAvatar(Vector3.zero);
+            var avatar = InstantiateAvatar(Vector3.zero);
             avatar.isGrounded = false;
             float oldY = avatar.position.y;
             float oldDistance = 0;
-            for (int i = 0; i < 10; i++)
-            {
+            for (int i = 0; i < 10; i++) {
                 yield return new WaitForFixedUpdate();
                 float newY = avatar.position.y;
                 float newDistance = Mathf.Abs(newY - oldY);
@@ -193,11 +168,10 @@ namespace Tests
         public IEnumerator T05c_AvatarMovement(
             [ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move,
             [ValueSource(nameof(AVATAR_SPEED_VALUES))] float speed,
-            [ValueSource(nameof(AVATAR_SPEED_DURATIONS))] int frames)
-        {
+            [ValueSource(nameof(AVATAR_SPEED_DURATIONS))] int frames) {
             yield return new WaitForFixedUpdate();
 
-            AvatarBridge avatar = InstantiateAvatar(Vector3.zero);
+            var avatar = InstantiateAvatar(Vector3.zero);
             avatar.isGrounded = false;
             avatar.movementSpeed = speed;
 
@@ -206,10 +180,8 @@ namespace Tests
             float target = avatar.position.x;
             target += move.sign * speed * frames * Time.fixedDeltaTime;
 
-            using (new InputPress(input, move.key))
-            {
-                for (int i = 0; i < frames; i++)
-                {
+            using (new InputPress(input, move.key)) {
+                for (int i = 0; i < frames; i++) {
                     yield return new WaitForFixedUpdate();
                 }
 
@@ -222,19 +194,17 @@ namespace Tests
             yield return new WaitForFixedUpdate();
         }
         [UnityTest]
-        public IEnumerator T05d_AvatarGravityWhenGrounded()
-        {
+        public IEnumerator T05d_AvatarGravityWhenGrounded() {
             yield return new WaitForFixedUpdate();
 
-            PlatformBridge platform = InstantiatePlatform(Vector3.zero);
+            var platform = InstantiatePlatform(Vector3.zero);
             platform.scale = Vector3.one;
 
-            AvatarBridge avatar = InstantiateAvatar(Vector3.up);
+            var avatar = InstantiateAvatar(Vector3.up);
             avatar.scale = Vector3.one;
             avatar.isGrounded = false;
 
-            for (int i = 0; i < 10; i++)
-            {
+            for (int i = 0; i < 10; i++) {
                 yield return new WaitForFixedUpdate();
             }
 
@@ -247,40 +217,39 @@ namespace Tests
 
 
         [Test]
-        public void T06a_SceneExists()
-        {
-            FileInfo file = new FileInfo(SCENE_PATH);
+        public void T06a_SceneExists() {
+            var file = new FileInfo(SCENE_PATH);
             FileAssert.Exists(file);
         }
         [UnityTest]
-        public IEnumerator T06b_PrefabInstancesExistInScene()
-        {
+        public IEnumerator T06b_PrefabInstancesExistInScene() {
             yield return new WaitForFixedUpdate();
 
-            GameObject platformPrefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
-            GameObject avatarPrefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
+            var platformPrefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
+            var avatarPrefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
 
             yield return LoadTestScene(SCENE_NAME);
 
-            GameObject[] avatars = currentScene
+            var avatars = currentScene
                 .GetPrefabInstances(avatarPrefab)
                 .ToArray();
-            GameObject[] platforms = currentScene
+            var platforms = currentScene
                 .GetPrefabInstances(platformPrefab)
                 .ToArray();
 
-            Assert.AreEqual(SCENE_AVATAR_COUNT, avatars.Length, $"Scene {SCENE_NAME} must have exactly {SCENE_AVATAR_COUNT} instance(s) of prefab {avatarPrefab}!"); ; ;
+            Assert.AreEqual(SCENE_AVATAR_COUNT, avatars.Length, $"Scene {SCENE_NAME} must have exactly {SCENE_AVATAR_COUNT} instance(s) of prefab {avatarPrefab}!");
+            ;
+            ;
             Assert.AreEqual(
                 SCENE_PLATFORM_COUNT, platforms.Length, $"Scene {SCENE_NAME} must have exactly {SCENE_PLATFORM_COUNT} instance(s) of prefab {platformPrefab}!");
 
-            AvatarBridge avatar = new AvatarBridge(avatars[0]);
+            var avatar = new AvatarBridge(avatars[0]);
 
             float timeout = Time.time + SCENE_TIMEOUT;
             yield return new WaitUntil(() => avatar.isGrounded || Time.time > timeout);
             Assert.IsTrue(avatar.isGrounded, $"After waiting {SCENE_TIMEOUT}s, avatar should be grounded!");
 
-            using (new InputPress(input, AVATAR_JUMPKEY))
-            {
+            using (new InputPress(input, AVATAR_JUMPKEY)) {
 
                 timeout = Time.time + SCENE_TIMEOUT;
                 yield return new WaitUntil(() => !avatar.isGrounded || Time.time > timeout);
@@ -294,22 +263,20 @@ namespace Tests
             yield return new WaitForFixedUpdate();
         }
 
-        private AvatarBridge InstantiateAvatar(Vector3 position)
-        {
+        AvatarBridge InstantiateAvatar(Vector3 position) {
 
-            GameObject prefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
-            GameObject instance = InstantiateGameObject(prefab, position, Quaternion.identity);
-            AvatarBridge avatar = new AvatarBridge(instance);
+            var prefab = TestUtils.LoadPrefab(AVATAR_PREFAB);
+            var instance = InstantiateGameObject(prefab, position, Quaternion.identity);
+            var avatar = new AvatarBridge(instance);
             avatar.rigidbody.mass = 1;
             avatar.rigidbody.drag = 0;
             return avatar;
         }
 
-        private PlatformBridge InstantiatePlatform(Vector3 position)
-        {
+        PlatformBridge InstantiatePlatform(Vector3 position) {
 
-            GameObject prefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
-            GameObject instance = InstantiateGameObject(prefab, position, Quaternion.identity);
+            var prefab = TestUtils.LoadPrefab(PLATFORM_PREFAB);
+            var instance = InstantiateGameObject(prefab, position, Quaternion.identity);
             return new PlatformBridge(instance);
         }
     }

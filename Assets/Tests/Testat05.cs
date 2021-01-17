@@ -1,79 +1,65 @@
-﻿using NUnit.Framework;
-using System.Collections;
+﻿using System.Collections;
 using System.IO;
 using System.Linq;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.TestTools;
 
-namespace Tests
-{
-    public class Testat05 : TestSuite
-    {
-        private class MarioBridge : GameObjectBridge
-        {
-            public bool isGrounded
-            {
+namespace Tests {
+    public class Testat05 : TestSuite {
+        class MarioBridge : GameObjectBridge {
+            public bool isGrounded {
                 get => isGroundedBridge.value;
                 set => isGroundedBridge.value = value;
             }
-            private readonly FieldBridge<bool> isGroundedBridge;
-            public float defaultAcceleration
-            {
+            readonly FieldBridge<bool> isGroundedBridge;
+            public float defaultAcceleration {
                 get => defaultAccelerationBridge.value;
                 set => defaultAccelerationBridge.value = value;
             }
-            private readonly FieldBridge<float> defaultAccelerationBridge;
-            public float maximumSpeed
-            {
+            readonly FieldBridge<float> defaultAccelerationBridge;
+            public float maximumSpeed {
                 get => maximumSpeedBridge.value;
                 set => maximumSpeedBridge.value = value;
             }
-            private readonly FieldBridge<float> maximumSpeedBridge;
-            public float jumpSpeed
-            {
+            readonly FieldBridge<float> maximumSpeedBridge;
+            public float jumpSpeed {
                 get => jumpSpeedBridge.value;
                 set => jumpSpeedBridge.value = value;
             }
-            private readonly FieldBridge<float> jumpSpeedBridge;
-            public float GetCurrentAcceleration()
-            {
+            readonly FieldBridge<float> jumpSpeedBridge;
+            public float GetCurrentAcceleration() {
                 return getCurrentAccelerationBridge.Invoke();
             }
 
-            private readonly MethodBridge<float> getCurrentAccelerationBridge;
-            public float GetCurrentJumpSpeed()
-            {
+            readonly MethodBridge<float> getCurrentAccelerationBridge;
+            public float GetCurrentJumpSpeed() {
                 return getCurrentJumpSpeedBridge.Invoke();
             }
 
-            private readonly MethodBridge<float> getCurrentJumpSpeedBridge;
+            readonly MethodBridge<float> getCurrentJumpSpeedBridge;
 
-            public Rigidbody2D rigidbody
-            {
+            public Rigidbody2D rigidbody {
                 get;
                 private set;
             }
-            public BoxCollider2D collider
-            {
+            public BoxCollider2D collider {
                 get;
                 private set;
             }
             public Color rendererColor => renderer.material.color;
-            public Renderer renderer
-            {
+            public Renderer renderer {
                 get;
                 private set;
             }
-            public Physics2DEvents physics
-            {
+            public Physics2DEvents physics {
                 get;
                 private set;
             }
 
-            public MarioBridge(GameObject gameObject, bool isInstance = false) : base(gameObject)
-            {
+            public MarioBridge(GameObject gameObject, bool isInstance = false) : base(gameObject) {
                 isGroundedBridge = FindField<bool>(nameof(isGrounded));
                 defaultAccelerationBridge = FindField<float>(nameof(defaultAcceleration));
                 maximumSpeedBridge = FindField<float>(nameof(maximumSpeed));
@@ -85,41 +71,34 @@ namespace Tests
                 rigidbody = FindComponent<Rigidbody2D>();
                 collider = FindComponent<BoxCollider2D>();
                 renderer = FindComponentInChildren<Renderer>();
-                if (isInstance)
-                {
+                if (isInstance) {
                     physics = gameObject.AddComponent<Physics2DEvents>();
                 }
             }
         }
-        public class PlatformBridge : GameObjectBridge
-        {
-            public float allowedAcceleration
-            {
+        public class PlatformBridge : GameObjectBridge {
+            public float allowedAcceleration {
                 get => allowedAccelerationBridge.value;
                 set => allowedAccelerationBridge.value = value;
             }
-            private readonly FieldBridge<float> allowedAccelerationBridge;
-            public float jumpSpeedMultiplier
-            {
+            readonly FieldBridge<float> allowedAccelerationBridge;
+            public float jumpSpeedMultiplier {
                 get => jumpSpeedMultiplierBridge.value;
                 set => jumpSpeedMultiplierBridge.value = value;
             }
-            private readonly FieldBridge<float> jumpSpeedMultiplierBridge;
+            readonly FieldBridge<float> jumpSpeedMultiplierBridge;
 
-            public BoxCollider2D collider
-            {
+            public BoxCollider2D collider {
                 get;
                 private set;
             }
             public Color rendererColor => renderer.material.color;
-            public Renderer renderer
-            {
+            public Renderer renderer {
                 get;
                 private set;
             }
 
-            public PlatformBridge(GameObject gameObject) : base(gameObject)
-            {
+            public PlatformBridge(GameObject gameObject) : base(gameObject) {
                 allowedAccelerationBridge = FindField<float>(nameof(allowedAcceleration));
                 jumpSpeedMultiplierBridge = FindField<float>(nameof(jumpSpeedMultiplier));
                 collider = FindComponent<BoxCollider2D>();
@@ -127,25 +106,20 @@ namespace Tests
             }
         }
         [System.Serializable]
-        public class Move
-        {
+        public class Move {
             public KeyControl key;
             public int sign;
             public float maximumSpeed;
             public float defaultAcceleration;
 
-            public override string ToString()
-            {
+            public override string ToString() {
                 return $"{key.name}, {defaultAcceleration}m/s², {maximumSpeed}m/s";
             }
         }
-        private static Move[] MOVEMENT_DIRECTIONS
-        {
-            get
-            {
-                Keyboard keyboard = Keyboard.current;
-                if (keyboard == null)
-                {
+        static Move[] MOVEMENT_DIRECTIONS {
+            get {
+                var keyboard = Keyboard.current;
+                if (keyboard == null) {
                     keyboard = InputSystem.AddDevice<Keyboard>();
                 }
                 return new[]
@@ -156,54 +130,50 @@ namespace Tests
             }
         }
 
-        private static string[] PREFAB_FILES => new[] { PREFAB_MARIO, PLATFORM_ICE_PREFAB, PLATFORM_METAL_PREFAB, PLATFORM_DIRT_PREFAB };
-        private static readonly string PREFAB_MARIO = "Assets/Prefabs/Mario.prefab";
-        private static readonly string PLATFORM_ICE_PREFAB = "Assets/Prefabs/Platform_Ice.prefab";
-        private static readonly string PLATFORM_METAL_PREFAB = "Assets/Prefabs/Platform_Metal.prefab";
-        private static readonly string PLATFORM_DIRT_PREFAB = "Assets/Prefabs/Platform_Dirt.prefab";
-        private static string[] MATERIAL_FILES => new[] { MATERIAL_ICY, MATERIAL_DEFAULT, MATERIAL_STICKY };
-        private static readonly string MATERIAL_ICY = "Assets/PhysicsMaterials/Icy.physicsMaterial2D";
-        private static readonly string MATERIAL_DEFAULT = "Assets/PhysicsMaterials/Default.physicsMaterial2D";
-        private static readonly string MATERIAL_STICKY = "Assets/PhysicsMaterials/Sticky.physicsMaterial2D";
+        static string[] PREFAB_FILES => new[] { PREFAB_MARIO, PLATFORM_ICE_PREFAB, PLATFORM_METAL_PREFAB, PLATFORM_DIRT_PREFAB };
+        static readonly string PREFAB_MARIO = "Assets/Prefabs/Mario.prefab";
+        static readonly string PLATFORM_ICE_PREFAB = "Assets/Prefabs/Platform_Ice.prefab";
+        static readonly string PLATFORM_METAL_PREFAB = "Assets/Prefabs/Platform_Metal.prefab";
+        static readonly string PLATFORM_DIRT_PREFAB = "Assets/Prefabs/Platform_Dirt.prefab";
+        static string[] MATERIAL_FILES => new[] { MATERIAL_ICY, MATERIAL_DEFAULT, MATERIAL_STICKY };
+        static readonly string MATERIAL_ICY = "Assets/PhysicsMaterials/Icy.physicsMaterial2D";
+        static readonly string MATERIAL_DEFAULT = "Assets/PhysicsMaterials/Default.physicsMaterial2D";
+        static readonly string MATERIAL_STICKY = "Assets/PhysicsMaterials/Sticky.physicsMaterial2D";
 
-        private static (string, string)[] PLATFORM_INFOS => new[]
+        static (string, string)[] PLATFORM_INFOS => new[]
         {
             (PLATFORM_ICE_PREFAB, MATERIAL_ICY),
             (PLATFORM_METAL_PREFAB, MATERIAL_DEFAULT),
             (PLATFORM_DIRT_PREFAB, MATERIAL_STICKY)
         };
 
-        private const string SCENE_PATH = "./Assets/Scenes/MarioTest.unity";
-        private const string SCENE_NAME = "MarioTest";
-        private const int SCENE_AVATAR_COUNT = 1;
-        private const int SCENE_PLATFORM_COUNT = 5;
-        private const float SCENE_TIMEOUT = 5;
+        const string SCENE_PATH = "./Assets/Scenes/MarioTest.unity";
+        const string SCENE_NAME = "MarioTest";
+        const int SCENE_AVATAR_COUNT = 1;
+        const int SCENE_PLATFORM_COUNT = 5;
+        const float SCENE_TIMEOUT = 5;
 
         [Test]
-        public void T06_PrefabExists([ValueSource(nameof(PREFAB_FILES))] string path)
-        {
+        public void T06_PrefabExists([ValueSource(nameof(PREFAB_FILES))] string path) {
             TestUtils.LoadPrefab(path);
         }
         [Test]
-        public void T05a_PhysicsMaterialExists([ValueSource(nameof(MATERIAL_FILES))] string path)
-        {
+        public void T05a_PhysicsMaterialExists([ValueSource(nameof(MATERIAL_FILES))] string path) {
             LoadAsset<PhysicsMaterial2D>(path);
         }
         [Test]
-        public void T05b_PhysicsMaterialsFriction()
-        {
-            PhysicsMaterial2D icy = LoadAsset<PhysicsMaterial2D>(MATERIAL_ICY);
-            PhysicsMaterial2D dflt = LoadAsset<PhysicsMaterial2D>(MATERIAL_DEFAULT);
-            PhysicsMaterial2D sticky = LoadAsset<PhysicsMaterial2D>(MATERIAL_STICKY);
+        public void T05b_PhysicsMaterialsFriction() {
+            var icy = LoadAsset<PhysicsMaterial2D>(MATERIAL_ICY);
+            var dflt = LoadAsset<PhysicsMaterial2D>(MATERIAL_DEFAULT);
+            var sticky = LoadAsset<PhysicsMaterial2D>(MATERIAL_STICKY);
             Assert.Less(icy.friction, dflt.friction, $"Friction of {icy} must be lower than friction of {dflt}!");
             Assert.Less(dflt.friction, sticky.friction, $"Friction of {dflt} must be lower than friction of {sticky}!");
         }
         [Test]
-        public void T04_PlatformPrefab([ValueSource(nameof(PLATFORM_INFOS))] (string, string) info)
-        {
-            GameObject prefab = TestUtils.LoadPrefab(info.Item1);
-            PhysicsMaterial2D mat = LoadAsset<PhysicsMaterial2D>(info.Item2);
-            PlatformBridge platform = new PlatformBridge(prefab);
+        public void T04_PlatformPrefab([ValueSource(nameof(PLATFORM_INFOS))] (string, string) info) {
+            var prefab = TestUtils.LoadPrefab(info.Item1);
+            var mat = LoadAsset<PhysicsMaterial2D>(info.Item2);
+            var platform = new PlatformBridge(prefab);
             Assert.IsNotNull(platform.collider, $"'{info.Item1}' needs a Collider2D!");
             Assert.IsNotNull(platform.renderer, $"'{info.Item1}' needs a Renderer!");
             Assert.AreEqual(mat, platform.collider.sharedMaterial, $"Platform {prefab} should use physics material {mat}!");
@@ -211,15 +181,14 @@ namespace Tests
             Assert.Greater(platform.jumpSpeedMultiplier, 0, $"Platform {prefab} should have an {nameof(platform.jumpSpeedMultiplier)} > 0!");
         }
         [Test]
-        public void T02_MarioPrefab()
-        {
-            GameObject prefab = TestUtils.LoadPrefab(PREFAB_MARIO);
+        public void T02_MarioPrefab() {
+            var prefab = TestUtils.LoadPrefab(PREFAB_MARIO);
 
-            MarioBridge mario = new MarioBridge(prefab);
+            var mario = new MarioBridge(prefab);
             Assert.IsNotNull(mario.rigidbody, $"'{PREFAB_MARIO}' needs a Rigidbody2D!");
             Assert.IsNotNull(mario.collider, $"'{PREFAB_MARIO}' needs a Collider2D!");
-            Vector2 targetOffset = new Vector2(0, 0);
-            Vector2 targetSize = new Vector2(1, 2);
+            var targetOffset = new Vector2(0, 0);
+            var targetSize = new Vector2(1, 2);
             Assert.AreNotEqual(mario.gameObject, mario.renderer.gameObject, $"Mario's Renderer should be on its own GameObject, as a child of Mario's prefab!");
             CustomAssert.AreEqual(Vector3.one, mario.transform.localScale, $"Mario's Transform must have an scale of {Vector3.one}!");
             CustomAssert.AreEqual(targetOffset, mario.collider.offset, $"Mario's Collider2D must have an offset of {targetOffset}!");
@@ -229,11 +198,10 @@ namespace Tests
             Assert.AreEqual(RigidbodyConstraints2D.FreezeRotation, mario.rigidbody.constraints, $"Mario should not be able to rotate!");
         }
         [UnityTest]
-        public IEnumerator T03_MarioMovement([ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move)
-        {
+        public IEnumerator T03_MarioMovement([ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move) {
             yield return new WaitForFixedUpdate();
 
-            MarioBridge mario = InstantiateMario(Vector3.zero);
+            var mario = InstantiateMario(Vector3.zero);
             mario.maximumSpeed = move.maximumSpeed;
             mario.defaultAcceleration = move.defaultAcceleration;
             mario.jumpSpeed = move.maximumSpeed;
@@ -248,10 +216,8 @@ namespace Tests
             Assert.AreEqual(0, previousSpeed, "Mario should start with horizontal speed of 0m/s!");
             Assert.AreEqual(move.maximumSpeed, mario.GetCurrentJumpSpeed(), $"In freefall, Mario's jump speed should be {move.maximumSpeed}m/s!");
 
-            using (new InputPress(input, move.key))
-            {
-                do
-                {
+            using (new InputPress(input, move.key)) {
+                do {
                     yield return new WaitForFixedUpdate();
                     yield return new WaitForFixedUpdate();
                     currentSpeed = mario.rigidbody.velocity.x;
@@ -260,8 +226,7 @@ namespace Tests
                     Assert.AreEqual(move.defaultAcceleration, mario.defaultAcceleration, $"Mario's {nameof(mario.defaultAcceleration)} should not be changed by script!");
                     Assert.AreEqual(move.defaultAcceleration, mario.GetCurrentAcceleration(), $"Mario's {nameof(mario.GetCurrentAcceleration)} should return {nameof(mario.defaultAcceleration)} in freefall!");
                     Assert.Greater(Mathf.Abs(currentSpeed), Mathf.Abs(previousSpeed), $"Mario's speed must increase each frame!");
-                    if (Time.time > timeout)
-                    {
+                    if (Time.time > timeout) {
                         Assert.Fail($"In freefall and with acceleration of {mario.defaultAcceleration}m/s², Mario should reach {targetSpeed}m/s in {SCENE_TIMEOUT}s, but was {mario.rigidbody.velocity.x}m/s!");
                     }
                     previousSpeed = currentSpeed;
@@ -279,51 +244,47 @@ namespace Tests
             yield return new WaitForFixedUpdate();
         }
         [Test]
-        public void T07a_SceneExists()
-        {
-            FileInfo file = new FileInfo(SCENE_PATH);
+        public void T07a_SceneExists() {
+            var file = new FileInfo(SCENE_PATH);
             FileAssert.Exists(file);
         }
         [UnityTest]
-        public IEnumerator T07b_PrefabInstancesExistInScene()
-        {
-            void validatePlatforms(GameObject prefab, PlatformBridge[] instances)
-            {
+        public IEnumerator T07b_PrefabInstancesExistInScene() {
+            void validatePlatforms(GameObject prefab, PlatformBridge[] instances) {
                 Assert.GreaterOrEqual(
                     instances.Length,
                     1,
                     $"Scene {SCENE_NAME} must at least 1 instance of prefab {prefab}!"
                 );
-                Color color = instances[0].rendererColor;
-                for (int i = 1; i < instances.Length; i++)
-                {
+                var color = instances[0].rendererColor;
+                for (int i = 1; i < instances.Length; i++) {
                     CustomAssert.AreEqual(color, instances[i].rendererColor, $"All instancecs of {prefab} must have the same color!");
                 }
             }
             yield return new WaitForFixedUpdate();
 
-            GameObject avatarPrefab = TestUtils.LoadPrefab(PREFAB_MARIO);
-            GameObject icePrefab = TestUtils.LoadPrefab(PLATFORM_ICE_PREFAB);
-            GameObject metalPrefab = TestUtils.LoadPrefab(PLATFORM_METAL_PREFAB);
-            GameObject dirtPrefab = TestUtils.LoadPrefab(PLATFORM_DIRT_PREFAB);
+            var avatarPrefab = TestUtils.LoadPrefab(PREFAB_MARIO);
+            var icePrefab = TestUtils.LoadPrefab(PLATFORM_ICE_PREFAB);
+            var metalPrefab = TestUtils.LoadPrefab(PLATFORM_METAL_PREFAB);
+            var dirtPrefab = TestUtils.LoadPrefab(PLATFORM_DIRT_PREFAB);
 
             yield return LoadTestScene(SCENE_NAME);
 
-            MarioBridge[] avatars = currentScene.GetPrefabInstances(avatarPrefab)
+            var avatars = currentScene.GetPrefabInstances(avatarPrefab)
                 .Select(obj => new MarioBridge(obj, true))
                 .ToArray();
 
-            PlatformBridge[] icePlatforms = currentScene.GetPrefabInstances(icePrefab)
+            var icePlatforms = currentScene.GetPrefabInstances(icePrefab)
                 .Select(obj => new PlatformBridge(obj))
                 .ToArray();
-            PlatformBridge[] metalPlatforms = currentScene.GetPrefabInstances(metalPrefab)
+            var metalPlatforms = currentScene.GetPrefabInstances(metalPrefab)
                 .Select(obj => new PlatformBridge(obj))
                 .ToArray();
-            PlatformBridge[] dirtPlatforms = currentScene.GetPrefabInstances(dirtPrefab)
+            var dirtPlatforms = currentScene.GetPrefabInstances(dirtPrefab)
                 .Select(obj => new PlatformBridge(obj))
                 .ToArray();
 
-            PlatformBridge[] platforms = icePlatforms
+            var platforms = icePlatforms
                 .Union(metalPlatforms)
                 .Union(dirtPlatforms)
                 .ToArray();
@@ -360,12 +321,11 @@ namespace Tests
                 $"Scene {SCENE_NAME} must have at least {SCENE_PLATFORM_COUNT} instances of platform prefabs!"
             );
 
-            MarioBridge mario = avatars[0];
+            var mario = avatars[0];
             PlatformBridge platform = default;
             float startingSpeed = mario.jumpSpeed;
 
-            mario.physics.onCollisionEnter += collision =>
-            {
+            mario.physics.onCollisionEnter += collision => {
                 platform = new PlatformBridge(collision.gameObject);
             };
 
@@ -377,12 +337,11 @@ namespace Tests
             Assert.AreEqual(platform.jumpSpeedMultiplier * startingSpeed, mario.GetCurrentJumpSpeed(), $"Mario's {nameof(mario.GetCurrentJumpSpeed)} should have returned Mario's {nameof(mario.jumpSpeed)} multiplied by Platform's {nameof(platform.jumpSpeedMultiplier)}!");
         }
 
-        private MarioBridge InstantiateMario(Vector3 position)
-        {
+        MarioBridge InstantiateMario(Vector3 position) {
 
-            GameObject prefab = TestUtils.LoadPrefab(PREFAB_MARIO);
-            GameObject instance = InstantiateGameObject(prefab, position, Quaternion.identity);
-            MarioBridge avatar = new MarioBridge(instance, true);
+            var prefab = TestUtils.LoadPrefab(PREFAB_MARIO);
+            var instance = InstantiateGameObject(prefab, position, Quaternion.identity);
+            var avatar = new MarioBridge(instance, true);
             avatar.rigidbody.mass = 1;
             avatar.rigidbody.drag = 0;
             return avatar;
