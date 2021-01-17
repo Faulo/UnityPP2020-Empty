@@ -6,7 +6,6 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
-using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace Tests {
@@ -218,8 +217,9 @@ namespace Tests {
                 using (new InputPress(input, move.keys)) {
                     yield return WaitForState(move.sign == 0 ? "Crouch" : "CrouchingWalk", $"While pressing '{move}' and waiting {SCENE_TIMEOUT}s, ");
                 }
+                yield return WaitForState("Crouch", $"After releasing '{move}' and waiting {SCENE_TIMEOUT}s, ");
             }
-            yield return WaitForState("Idle", $"After releasing '{move}' and waiting {SCENE_TIMEOUT}s, ");
+            yield return WaitForState("Idle", $"After releasing '{Keyboard.current.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
         }
 
         [UnityTest]
@@ -232,8 +232,9 @@ namespace Tests {
                 using (new InputPress(input, move.keys)) {
                     yield return WaitForState("Jumping", $"While pressing '{move}' and waiting {SCENE_TIMEOUT}s, ");
                 }
+                yield return WaitForState("Jumping", $"After releasing '{move}' and waiting {SCENE_TIMEOUT}s, ");
             }
-            yield return WaitForState("Jumping", $"After releasing '{move}' and waiting {SCENE_TIMEOUT}s, ");
+            yield return WaitForState("Jumping", $"After releasing '{Keyboard.current.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
         }
 
         MarioBridge LoadMarioPrefab() {
