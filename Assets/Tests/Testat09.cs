@@ -20,7 +20,9 @@ namespace Tests {
                 set => FindField<bool>(nameof(isGrounded)).value = value;
             }
         }
-        public class PlatformBridge : GameObjectBridge {
+        public class PlatformBridge : GameObjectBridge
+        {
+            public BoxCollider2D collider => FindComponent<BoxCollider2D>();
             public PlatformBridge(GameObject gameObject) : base(gameObject) {
             }
         }
@@ -185,6 +187,8 @@ namespace Tests {
             var prefab = TestUtils.LoadPrefab(prefabFile);
             var instance = InstantiateGameObject(prefab, position, Quaternion.identity);
             platform = new PlatformBridge(instance);
+            platform.transform.localScale = Vector3.one;
+            platform.collider.size = Vector2.one;
         }
         void InstantiateCamera(Vector3 position) {
             var prefab = TestUtils.LoadPrefab(PREFAB_CAMERA);
