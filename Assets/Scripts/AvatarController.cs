@@ -33,7 +33,7 @@ public class AvatarController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        var velocity = attachedRigidbody.velocity;
+        Vector2 velocity = attachedRigidbody.velocity;
 
         velocity.x = movementAction.ReadValue<float>() * movementSpeed;
 
@@ -48,7 +48,7 @@ public class AvatarController : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         isGrounded = true;
-        if (collision.gameObject.TryGetComponent<ColoredPlatform>(out var platform))
+        if (collision.gameObject.TryGetComponent<ColoredPlatform>(out ColoredPlatform platform))
         {
             SetRendererColor(platform.platformColor);
         }

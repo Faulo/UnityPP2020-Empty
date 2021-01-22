@@ -11,7 +11,7 @@ public class InputTest : MonoBehaviour
 
     private void FixedUpdate()
     {
-        var direction = Vector3.zero;
+        Vector3 direction = Vector3.zero;
         if (Keyboard.current.upArrowKey.isPressed)
         {
             direction += Vector3.up;

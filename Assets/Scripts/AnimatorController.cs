@@ -3,18 +3,18 @@ using UnityEngine;
 
 public class AnimatorController : MonoBehaviour
 {
-    SpriteRenderer attachedRenderer;
-    Animator attachedAnimator;
-    MarioController attachedMario;
+    private SpriteRenderer attachedRenderer;
+    private Animator attachedAnimator;
+    private MarioController attachedMario;
 
-    void Start()
+    private void Start()
     {
         attachedRenderer = GetComponent<SpriteRenderer>();
         attachedAnimator = GetComponent<Animator>();
         attachedMario = GetComponentInParent<MarioController>();
     }
 
-    void Update()
+    private void Update()
     {
         switch (Math.Sign(attachedMario.intendedMovement))
         {

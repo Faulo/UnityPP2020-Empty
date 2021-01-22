@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class MarioController : MonoBehaviour, IColorable {
+public class MarioController : MonoBehaviour, IColorable
+{
     public bool isGrounded = false;
     public bool isJumping = false;
     public bool isCrouching = false;
@@ -20,56 +21,69 @@ public class MarioController : MonoBehaviour, IColorable {
     public InputAction movementAction = default;
     public InputAction jumpAction = default;
     public InputAction crouchAction = default;
-
-    Rigidbody2D attachedRigidbody;
-    BoxCollider2D attachedCollider;
-    MarioPlatform lastPlatform;
-    Renderer attachedRenderer;
+    private Rigidbody2D attachedRigidbody;
+    private BoxCollider2D attachedCollider;
+    private MarioPlatform lastPlatform;
+    private Renderer attachedRenderer;
 
     public Color groundedColor = Color.white;
     public Color jumpingColor = Color.green;
     public Color fallingColor = Color.blue;
 
-    void Start() {
+    private void Start()
+    {
         attachedRigidbody = GetComponent<Rigidbody2D>();
         attachedCollider = GetComponent<BoxCollider2D>();
         attachedRenderer = GetComponentInChildren<Renderer>();
     }
 
-    void OnEnable() {
+    private void OnEnable()
+    {
         movementAction.Enable();
         jumpAction.Enable();
         crouchAction.Enable();
     }
-    void OnDisable() {
+
+    private void OnDisable()
+    {
         movementAction.Disable();
         jumpAction.Disable();
         crouchAction.Disable();
     }
 
-    void Update() {
+    private void Update()
+    {
         attachedRenderer.material.color = GetCurrentColor();
     }
 
-    public void SetColors(Color groundedColor, Color jumpingColor, Color fallingColor) {
+    public void SetColors(Color groundedColor, Color jumpingColor, Color fallingColor)
+    {
         this.groundedColor = groundedColor;
         this.jumpingColor = jumpingColor;
         this.fallingColor = fallingColor;
     }
-    public Color GetCurrentColor() {
-        if (isGrounded) {
+    public Color GetCurrentColor()
+    {
+        if (isGrounded)
+        {
             return groundedColor;
-        } else {
-            if (isJumping) {
+        }
+        else
+        {
+            if (isJumping)
+            {
                 return jumpingColor;
-            } else {
+            }
+            else
+            {
                 return fallingColor;
             }
         }
     }
 
-    void FixedUpdate() {
-        var velocity = attachedRigidbody.velocity;
+    private void FixedUpdate()
+    {
+        Vector2 velocity = attachedRigidbody.velocity;
 
         intendedMovement = movementAction.ReadValue<float>();
 
@@ -77,59 +91,78 @@ public class MarioController : MonoBehaviour, IColorable {
 
         velocity.x = Mathf.Clamp(velocity.x, -maximumSpeed, maximumSpeed);
 
-        if (isJumping) {
+        if (isJumping)
+        {
             isGrounded = false;
-            if (jumpAction.phase == InputActionPhase.Waiting) {
+            if (jumpAction.phase == InputActionPhase.Waiting)
+            {
                 velocity.y = jumpStopSpeed;
             }
-            if (velocity.y <= jumpStopSpeed) {
+            if (velocity.y <= jumpStopSpeed)
+            {
                 isJumping = false;
             }
         }
 
-        if (isGrounded && jumpAction.phase == InputActionPhase.Started) {
+        if (isGrounded && jumpAction.phase == InputActionPhase.Started)
+        {
             isJumping = true;
             velocity.x += movementAction.ReadValue<float>() * jumpForwardBoost;
             velocity.y = GetCurrentJumpSpeed();
         }
-        if (isGrounded && crouchAction.phase == InputActionPhase.Started) {
+        if (isGrounded && crouchAction.phase == InputActionPhase.Started)
+        {
             isCrouching = true;
-        } else {
+        }
+        else
+        {
             isCrouching = false;
         }
 
         attachedRigidbody.velocity = velocity;
     }
-    void OnCollisionEnter2D(Collision2D collision) {
-        if (CalculateContact(collision, out var contactPosition)) {
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (CalculateContact(collision, out Vector2 contactPosition))
+        {
             // regardless, create the dust
             Instantiate(contactParticlesPrefab, contactPosition, Quaternion.identity);
         }
     }
 
-    bool CalculateContact(Collision2D collision, out Vector2 contactPosition) {
+    private bool CalculateContact(Collision2D collision, out Vector2 contactPosition)
+    {
         // let's iterate over all contact points to calculate their average
-        var contactPositionSum = Vector2.zero;
+        Vector2 contactPositionSum = Vector2.zero;
         int contactPositionCount = 0;
-        for (int i = 0; i < collision.contactCount; i++) {
-            var contact = collision.GetContact(i);
+        for (int i = 0; i < collision.contactCount; i++)
+        {
+            ContactPoint2D contact = collision.GetContact(i);
             contactPositionSum += contact.point;
             contactPositionCount++;
         }
-        if (contactPositionCount > 0) {
+        if (contactPositionCount > 0)
+        {
             // calculate the average
             contactPosition = contactPositionSum / contactPositionCount;
             return true;
-        } else {
+        }
+        else
+        {
             contactPosition = Vector2.zero;
             return false;
         }
     }
 
-    void OnCollisionStay2D(Collision2D collision) {
-        if (CalculateContact(collision, out var contactPosition)) {
-            if (collision.gameObject.TryGetComponent<MarioPlatform>(out var platform)) {
-                if (contactPosition.y < transform.position.y) {
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (CalculateContact(collision, out Vector2 contactPosition))
+        {
+            if (collision.gameObject.TryGetComponent<MarioPlatform>(out MarioPlatform platform))
+            {
+                if (contactPosition.y < transform.position.y)
+                {
                     isGrounded = true;
                     // gotta save platform for later use
                     lastPlatform = platform;
@@ -138,21 +171,27 @@ public class MarioController : MonoBehaviour, IColorable {
         }
     }
 
-    void OnCollisionExit2D(Collision2D collision) {
+    private void OnCollisionExit2D(Collision2D collision)
+    {
         // only do stuff if we've actually hit a platform
-        if (collision.gameObject.TryGetComponent<MarioPlatform>(out var platform)) {
+        if (collision.gameObject.TryGetComponent<MarioPlatform>(out MarioPlatform platform))
+        {
             isGrounded = false;
         }
     }
 
-    public float GetCurrentAcceleration() {
-        if (isGrounded && lastPlatform) {
+    public float GetCurrentAcceleration()
+    {
+        if (isGrounded && lastPlatform)
+        {
             return lastPlatform.allowedAcceleration;
         }
         return defaultAcceleration;
     }
-    public float GetCurrentJumpSpeed() {
-        if (isGrounded && lastPlatform) {
+    public float GetCurrentJumpSpeed()
+    {
+        if (isGrounded && lastPlatform)
+        {
             return jumpSpeed * lastPlatform.jumpSpeedMultiplier;
         }
         return jumpSpeed;
