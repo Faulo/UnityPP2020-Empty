@@ -20,8 +20,7 @@ namespace Tests {
                 set => FindField<bool>(nameof(isGrounded)).value = value;
             }
         }
-        public class PlatformBridge : GameObjectBridge
-        {
+        public class PlatformBridge : GameObjectBridge {
             public BoxCollider2D collider => FindComponent<BoxCollider2D>();
             public PlatformBridge(GameObject gameObject) : base(gameObject) {
             }
