@@ -72,6 +72,9 @@ namespace Tests {
                 get => FindField<Vector2>(nameof(ejectVelocity)).value;
                 set => FindField<Vector2>(nameof(ejectVelocity)).value = value;
             }
+            public ParticleSystem targetParticles => target.GetComponentsInChildren<ParticleSystem>()
+                .FirstOrDefault(particles => particles != teleporterParticles);
+            public ParticleSystem teleporterParticles => gameObject.GetComponent<ParticleSystem>();
         }
         [Serializable]
         public class Move {
@@ -249,8 +252,8 @@ namespace Tests {
             var teleporter = LoadTeleporterPrefab();
             Assert.IsInstanceOf<Transform>(teleporter.target, $"{teleporter} requires a field '{nameof(teleporter.target)}'!");
             Assert.IsNotNull(teleporter.target, $"{teleporter} requires is '{nameof(teleporter.target)}' to be assigned!");
-            Assert.IsNotNull(teleporter.transform.GetComponent<ParticleSystem>(), $"{teleporter} requires a '{typeof(ParticleSystem)}' component!");
-            Assert.IsNotNull(teleporter.target.GetComponent<ParticleSystem>(), $"{teleporter}'s target requires a '{typeof(ParticleSystem)}' component!");
+            Assert.IsNotNull(teleporter.targetParticles, $"{teleporter}'s target requires a '{typeof(ParticleSystem)}' component!");
+            Assert.IsNotNull(teleporter.teleporterParticles, $"{teleporter} requires a '{typeof(ParticleSystem)}' component!");
         }
         [UnityTest]
         public IEnumerator T03b_VerifyTeleporterBehavior(
@@ -279,7 +282,7 @@ namespace Tests {
             yield return WaitForState("Falling", $"After getting teleported, ", 30);
         }
         IEnumerator SpawnRobotOnPlatform() {
-            InstantiateCamera(new Vector3(0, 0, -10));
+            InstantiateCamera(new Vector3(0, 5, -10));
             InstantiateRobot(new Vector3(0, 2, 0));
             robot.isCrouching = false;
             robot.isGrounded = false;
