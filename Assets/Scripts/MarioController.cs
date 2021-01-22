@@ -1,200 +1,160 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class MarioController : MonoBehaviour, IColorable
-{
-    public bool isJumping = false;
+public class MarioController : MonoBehaviour, IColorable {
     public bool isGrounded = false;
+    public bool isJumping = false;
+    public bool isCrouching = false;
+
+    public float defaultAcceleration = 5;
     public float maximumSpeed = 5;
+    public float intendedMovement;
+    public float verticalSpeed;
+
     public float jumpSpeed = 5;
     public float jumpForwardBoost = 1;
     public float jumpStopSpeed = 5;
-    public float defaultAcceleration = 20;
-    public InputAction movementAction = default;
-    public float movement;
-    public InputAction jumpAction = default;
-    public InputAction crouchAction = default;
-    public bool isCrouching = false;
+
     public GameObject contactParticlesPrefab;
 
-    public Rigidbody2D attachedRigidbody;
-    public SpriteRenderer attachedRenderer;
-    private MarioPlatform lastPlatform;
+    public InputAction movementAction = default;
+    public InputAction jumpAction = default;
+    public InputAction crouchAction = default;
 
-    private void Start()
-    {
+    Rigidbody2D attachedRigidbody;
+    BoxCollider2D attachedCollider;
+    MarioPlatform lastPlatform;
+    Renderer attachedRenderer;
+
+    public Color groundedColor = Color.white;
+    public Color jumpingColor = Color.green;
+    public Color fallingColor = Color.blue;
+
+    void Start() {
         attachedRigidbody = GetComponent<Rigidbody2D>();
-        attachedRenderer = GetComponentInChildren<SpriteRenderer>();
+        attachedCollider = GetComponent<BoxCollider2D>();
+        attachedRenderer = GetComponentInChildren<Renderer>();
     }
 
-    private void OnEnable()
-    {
+    void OnEnable() {
         movementAction.Enable();
         jumpAction.Enable();
         crouchAction.Enable();
     }
-    private void OnDisable()
-    {
+    void OnDisable() {
         movementAction.Disable();
         jumpAction.Disable();
         crouchAction.Disable();
     }
-    private void FixedUpdate()
-    {
-        movement = movementAction.ReadValue<float>();
-        if (movement > 0)
-        {
-            attachedRenderer.flipX = false;
-        }
-        if (movement < 0)
-        {
-            attachedRenderer.flipX = true;
-        }
 
-        // first, store the current velocity for modification
-        var velocity = attachedRigidbody.velocity;
-
-        // acceleration means adding a difference of velocity
-        velocity.x += movement * GetCurrentAcceleration() * Time.deltaTime;
-
-        // velocity must not exceed maximumSpeed
-        if (velocity.x > maximumSpeed)
-        {
-            velocity.x = maximumSpeed;
-        }
-        if (velocity.x < -maximumSpeed)
-        {
-            velocity.x = -maximumSpeed;
-        }
-
-        // if grounded, we can jump
-        if (isGrounded && jumpAction.phase == InputActionPhase.Started)
-        {
-            // Sobald die Sprungtaste gedrückt wird, soll nach wie vor Mario’s vertikaleGeschwindigkeit auf ​jumpSpeed​ gesetzt werden
-            velocity.y = GetCurrentJumpSpeed();
-
-            // Außerdem soll seine horizontale Geschwindigkeit um einen Betrag erhöhtwerden, der dem Feld ​jumpForwardBoost​ entspricht.
-            velocity.x += jumpForwardBoost * movement;
-
-            // Das Feld ​isJumping​ soll angeben, ob sich Mario gerade in derAufwärtsbewegung seines Sprunges befindet.
-            isJumping = true;
-        }
-        if (isJumping && jumpAction.phase != InputActionPhase.Started)
-        {
-            // Sollte während des Sprunges die Sprungtaste losgelassen werden, sollMario’s vertikale Geschwindigkeit den Wert des Feldes ​jumpStopSpeedannehmen und ​isJumping​ soll auf ​false​ gesetzt werden.
-            isJumping = false;
-            velocity.y = jumpStopSpeed;
-        }
-        if (isJumping && velocity.y < jumpStopSpeed)
-        {
-            // Ansonsten soll ​isJumping​ auch dann auf ​false​ gesetzt werden, wennMario’s aktuelle vertikale Geschwindigkeit unterhalb ​jumpStopSpeedfällt.
-            isJumping = false;
-        }
-
-        // if grounded, we can crouch
-        if (isGrounded && crouchAction.phase == InputActionPhase.Started)
-        {
-            isCrouching = true;
-        }
-        else
-        {
-            isCrouching = false;
-        }
-
-        // write velocity back to rigidbody
-        attachedRigidbody.velocity = velocity;
+    void Update() {
+        attachedRenderer.material.color = GetCurrentColor();
     }
 
-    private float GetCurrentAcceleration()
-    {
-        // if we're grounded, use platform's allowedAcceleration
-        if (isGrounded)
-        {
-            return lastPlatform.allowedAcceleration;
-        }
-        else
-        {
-            return defaultAcceleration;
-        }
-    }
-
-    private float GetCurrentJumpSpeed()
-    {
-        // if we're grounded, use platform's jumpSpeedMultiplier
-        if (isGrounded)
-        {
-            return jumpSpeed * lastPlatform.jumpSpeedMultiplier;
-        }
-        else
-        {
-            return jumpSpeed;
-        }
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        // only do stuff if we've collided with a platform
-        if (collision.gameObject.TryGetComponent<MarioPlatform>(out var platform))
-        {
-            // calculate collision point average
-            Vector2 sum = new Vector2();
-            for (int i = 0; i < collision.contactCount; i++)
-            {
-                sum += collision.GetContact(i).point;
-            }
-            Vector2 average = sum / collision.contactCount;
-
-            // only become grounded if platform is beneath us
-            if (average.y < transform.position.y)
-            {
-                lastPlatform = platform;
-                isGrounded = true;
-            }
-
-            // regardless, spawn particles at collisioin point
-            Instantiate(contactParticlesPrefab, average, Quaternion.identity);
-        }
-    }
-
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-        // only do stuff if we've collided with a platform
-        if (collision.gameObject.TryGetComponent<MarioPlatform>(out var platform))
-        {
-            isGrounded = false;
-        }
-    }
-
-    private Color groundedColor = Color.white;
-    private Color jumpingColor = Color.white;
-    private Color fallingColor = Color.white;
-    public void SetColors(Color groundedColor, Color jumpingColor, Color fallingColor)
-    {
-        // Die Methode ​SetColors​ legt die 3 Farben ​groundedColor​,jumpingColor​ und ​fallingColor​ fest, die Mario zur Einfärbungzur Verfügung stehen. Legen Sie für diese Farben geeignete Felderan.
+    public void SetColors(Color groundedColor, Color jumpingColor, Color fallingColor) {
         this.groundedColor = groundedColor;
         this.jumpingColor = jumpingColor;
         this.fallingColor = fallingColor;
     }
-
-    public Color GetCurrentColor()
-    {
-        if (isGrounded)
-        {
-            // Berührt Mario gerade den Boden (​isGrounded​ ist ​true​), gibgroundedColor​ zurück.
+    public Color GetCurrentColor() {
+        if (isGrounded) {
             return groundedColor;
+        } else {
+            if (isJumping) {
+                return jumpingColor;
+            } else {
+                return fallingColor;
+            }
         }
-        if (isJumping)
-        {
-            // Ansonsten, wenn Mario gerade springt (​isJumping​ ist ​true​),gib ​jumpingColor​ zurück.
-            return jumpingColor;
-        }
-        // Ansonsten gib ​fallingColor​ zurück.
-        return fallingColor;
     }
 
-    private void Update()
-    {
-        // Implementieren Sie außerdem eine ​Update​ Methode, die die Farbe vonMario’s ​MeshRenderer​ kontinuierlich (und mittels ​GetCurrentColor​)aktualisiert.
-        attachedRenderer.material.color = GetCurrentColor();
+    void FixedUpdate() {
+        var velocity = attachedRigidbody.velocity;
+
+        intendedMovement = movementAction.ReadValue<float>();
+
+        velocity.x += intendedMovement * GetCurrentAcceleration() * Time.deltaTime;
+
+        velocity.x = Mathf.Clamp(velocity.x, -maximumSpeed, maximumSpeed);
+
+        if (isJumping) {
+            isGrounded = false;
+            if (jumpAction.phase == InputActionPhase.Waiting) {
+                velocity.y = jumpStopSpeed;
+            }
+            if (velocity.y <= jumpStopSpeed) {
+                isJumping = false;
+            }
+        }
+
+        if (isGrounded && jumpAction.phase == InputActionPhase.Started) {
+            isJumping = true;
+            velocity.x += movementAction.ReadValue<float>() * jumpForwardBoost;
+            velocity.y = GetCurrentJumpSpeed();
+        }
+        if (isGrounded && crouchAction.phase == InputActionPhase.Started) {
+            isCrouching = true;
+        } else {
+            isCrouching = false;
+        }
+
+        attachedRigidbody.velocity = velocity;
+    }
+    void OnCollisionEnter2D(Collision2D collision) {
+        if (CalculateContact(collision, out var contactPosition)) {
+            // regardless, create the dust
+            Instantiate(contactParticlesPrefab, contactPosition, Quaternion.identity);
+        }
+    }
+
+    bool CalculateContact(Collision2D collision, out Vector2 contactPosition) {
+        // let's iterate over all contact points to calculate their average
+        var contactPositionSum = Vector2.zero;
+        int contactPositionCount = 0;
+        for (int i = 0; i < collision.contactCount; i++) {
+            var contact = collision.GetContact(i);
+            contactPositionSum += contact.point;
+            contactPositionCount++;
+        }
+        if (contactPositionCount > 0) {
+            // calculate the average
+            contactPosition = contactPositionSum / contactPositionCount;
+            return true;
+        } else {
+            contactPosition = Vector2.zero;
+            return false;
+        }
+    }
+
+    void OnCollisionStay2D(Collision2D collision) {
+        if (CalculateContact(collision, out var contactPosition)) {
+            if (collision.gameObject.TryGetComponent<MarioPlatform>(out var platform)) {
+                if (contactPosition.y < transform.position.y) {
+                    isGrounded = true;
+                    // gotta save platform for later use
+                    lastPlatform = platform;
+                }
+            }
+        }
+    }
+
+    void OnCollisionExit2D(Collision2D collision) {
+        // only do stuff if we've actually hit a platform
+        if (collision.gameObject.TryGetComponent<MarioPlatform>(out var platform)) {
+            isGrounded = false;
+        }
+    }
+
+    public float GetCurrentAcceleration() {
+        if (isGrounded && lastPlatform) {
+            return lastPlatform.allowedAcceleration;
+        }
+        return defaultAcceleration;
+    }
+    public float GetCurrentJumpSpeed() {
+        if (isGrounded && lastPlatform) {
+            return jumpSpeed * lastPlatform.jumpSpeedMultiplier;
+        }
+        return jumpSpeed;
     }
 }
