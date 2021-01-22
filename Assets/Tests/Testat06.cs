@@ -6,6 +6,7 @@ using UnityEngine.InputSystem.Controls;
 using UnityEngine.TestTools;
 
 namespace Tests {
+    [TestFixture]
     public class Testat06 : TestSuite {
         class MarioBridge : GameObjectBridge {
             public bool isGrounded {

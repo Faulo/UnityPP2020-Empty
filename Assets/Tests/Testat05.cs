@@ -3,11 +3,11 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.TestTools;
 
 namespace Tests {
+    [TestFixture]
     public class Testat05 : TestSuite {
         class MarioBridge : GameObjectBridge {
             public bool isGrounded {
@@ -118,10 +118,6 @@ namespace Tests {
         }
         static Move[] MOVEMENT_DIRECTIONS {
             get {
-                var keyboard = Keyboard.current;
-                if (keyboard == null) {
-                    keyboard = InputSystem.AddDevice<Keyboard>();
-                }
                 return new[]
                 {
                     new Move() {key = keyboard.rightArrowKey, sign = 1, maximumSpeed = 5, defaultAcceleration = 10 },

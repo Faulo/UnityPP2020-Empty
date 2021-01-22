@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.TestTools;
 using UnityEngine.TestTools.Utils;
 
 namespace Tests {
+    [TestFixture]
     public class Testat10 : TestSuite {
         class RobotBridge : GameObjectBridge {
             public RobotBridge(GameObject gameObject, bool isInstance = false) : base(gameObject) {
@@ -101,7 +101,6 @@ namespace Tests {
         };
         static Move[] MOVEMENT_DIRECTIONS {
             get {
-                var keyboard = Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
                 return new[]
                 {
                     new Move {
@@ -178,21 +177,21 @@ namespace Tests {
             yield return SpawnRobotOnPlatform();
             yield return WaitForState("Idle", "After spawning, ");
             Assert.AreEqual(new Vector2(1, 2), robot.collider.size, $"When idle, {robot}'s collider should have a size of (1, 2)!");
-            using (new InputPress(input, Keyboard.current.downArrowKey)) {
-                yield return WaitForState("Crouch", $"While pressing '{Keyboard.current.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
+            using (new InputPress(input, keyboard.downArrowKey)) {
+                yield return WaitForState("Crouch", $"While pressing '{keyboard.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
                 Assert.AreEqual(new Vector2(1, 1), robot.collider.size, $"When crouching, {robot}'s collider should have a size of (1, 1)!");
                 using (new InputPress(input, move.keys)) {
                     yield return WaitForState(move.sign == 0 ? "Crouch" : "CrouchingWalk", $"While pressing '{move}' and waiting {SCENE_TIMEOUT}s, ");
                 }
                 yield return WaitForState("Crouch", $"After releasing '{move}' and waiting {SCENE_TIMEOUT}s, ");
             }
-            yield return WaitForState("Idle", $"After releasing '{Keyboard.current.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
+            yield return WaitForState("Idle", $"After releasing '{keyboard.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
             Assert.AreEqual(new Vector2(1, 2), robot.collider.size, $"When idle, {robot}'s collider should have a size of (1, 2)!");
         }
         [UnityTest]
         public IEnumerator T02e_VerifyRobotJumpingWhenHoldingSpace() {
             yield return SpawnRobotOnPlatform();
-            var key = Keyboard.current.spaceKey;
+            var key = keyboard.spaceKey;
             Assert.AreEqual(0, FindObjectsInScene<ParticleSystem>().Length, $"Robot shouldn't have spawned ParticleSystems when landing!");
             using (new InputPress(input, key)) {
                 yield return WaitForState("Jumping", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ");
@@ -207,7 +206,7 @@ namespace Tests {
         [UnityTest]
         public IEnumerator T02f_VerifyRobotJumpingWhenTappingSpace() {
             yield return SpawnRobotOnPlatform();
-            var key = Keyboard.current.spaceKey;
+            var key = keyboard.spaceKey;
             Assert.AreEqual(0, FindObjectsInScene<ParticleSystem>().Length, $"Robot shouldn't have spawned ParticleSystems when landing!");
             using (new InputPress(input, key)) {
                 yield return WaitForState("Jumping", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ");
@@ -223,7 +222,7 @@ namespace Tests {
             yield return SpawnRobotOnPlatform();
             robot.doubleJumpCount = count;
             int frameCount = 5;
-            var key = Keyboard.current.spaceKey;
+            var key = keyboard.spaceKey;
             using (new InputPress(input, key)) {
                 yield return WaitForState("Jumping", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ", frameCount);
                 Assert.AreEqual(1, FindObjectsInScene<ParticleSystem>().Length, $"Robot should've spawned a ParticleSystem when jumping!");
@@ -292,7 +291,6 @@ namespace Tests {
             robot.doubleJumpCount = 1;
 
             InstantiatePlatform();
-            platform.collider.size = new Vector2(100, 1);
 
             float timeout = Time.time + SCENE_TIMEOUT;
             yield return new WaitUntil(() => robot.isGrounded || Time.time > timeout);
@@ -331,7 +329,8 @@ namespace Tests {
         }
         void InstantiatePlatform() {
             var instance = CreateGameObject("Platform");
-            instance.AddComponent<BoxCollider2D>();
+            instance.AddComponent<BoxCollider2D>().size = new Vector2(100, 1);
+            instance.AddComponent<LineRenderer>().SetPositions(new[] { Vector3.left * 50, Vector3.right * 50 });
             platform = new PlatformBridge(instance);
         }
         void InstantiateTeleporter(Vector3 position) {

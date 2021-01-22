@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.TestTools;
 
 namespace Tests {
+    [TestFixture]
     public class Testat08 : TestSuite {
         class MarioBridge : GameObjectBridge {
             public bool isGrounded {
@@ -122,7 +122,6 @@ namespace Tests {
 
         static Move[] MOVEMENT_DIRECTIONS {
             get {
-                var keyboard = Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
                 return new[]
                 {
                     new Move {
@@ -212,14 +211,14 @@ namespace Tests {
         public IEnumerator T07a_TestCrouchingGrounded([ValueSource(nameof(MOVEMENT_DIRECTIONS))] Move move) {
             yield return SpawnMarioOnPlatform();
             yield return WaitForState("Idle", "After spawning, ");
-            using (new InputPress(input, Keyboard.current.downArrowKey)) {
-                yield return WaitForState("Crouch", $"While pressing '{Keyboard.current.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
+            using (new InputPress(input, keyboard.downArrowKey)) {
+                yield return WaitForState("Crouch", $"While pressing '{keyboard.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
                 using (new InputPress(input, move.keys)) {
                     yield return WaitForState(move.sign == 0 ? "Crouch" : "CrouchingWalk", $"While pressing '{move}' and waiting {SCENE_TIMEOUT}s, ");
                 }
                 yield return WaitForState("Crouch", $"After releasing '{move}' and waiting {SCENE_TIMEOUT}s, ");
             }
-            yield return WaitForState("Idle", $"After releasing '{Keyboard.current.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
+            yield return WaitForState("Idle", $"After releasing '{keyboard.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
         }
 
         [UnityTest]
@@ -227,14 +226,14 @@ namespace Tests {
             InstantiateMario(Vector3.zero);
             mario.isGrounded = false;
             yield return WaitForState("Jumping", "After spawning in free-fall, ");
-            using (new InputPress(input, Keyboard.current.downArrowKey)) {
-                yield return WaitForState("Jumping", $"While pressing '{Keyboard.current.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
+            using (new InputPress(input, keyboard.downArrowKey)) {
+                yield return WaitForState("Jumping", $"While pressing '{keyboard.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
                 using (new InputPress(input, move.keys)) {
                     yield return WaitForState("Jumping", $"While pressing '{move}' and waiting {SCENE_TIMEOUT}s, ");
                 }
                 yield return WaitForState("Jumping", $"After releasing '{move}' and waiting {SCENE_TIMEOUT}s, ");
             }
-            yield return WaitForState("Jumping", $"After releasing '{Keyboard.current.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
+            yield return WaitForState("Jumping", $"After releasing '{keyboard.downArrowKey}' and waiting {SCENE_TIMEOUT}s, ");
         }
 
         MarioBridge LoadMarioPrefab() {

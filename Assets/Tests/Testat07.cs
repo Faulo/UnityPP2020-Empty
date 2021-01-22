@@ -3,11 +3,11 @@ using System.Collections;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.TestTools;
 
 namespace Tests {
+    [TestFixture]
     public class Testat07 : TestSuite {
         class MarioBridge : GameObjectBridge {
             public bool isGrounded {
@@ -151,7 +151,6 @@ namespace Tests {
 
         static Move[] MOVEMENT_DIRECTIONS {
             get {
-                var keyboard = Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
                 return new[]
                 {
                     new Move {
@@ -219,8 +218,6 @@ namespace Tests {
 
         [UnityTest]
         public IEnumerator T03a_HoldSpaceForever([ValueSource(nameof(JUMP_SPEEDS))] float jumpSpeed, [ValueSource(nameof(JUMP_STOP_SPEEDS))] float jumpStopSpeed) {
-            var keyboard = Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
-
             yield return SpawnMarioOnPlatform();
 
             mario.jumpSpeed = jumpSpeed;
@@ -238,8 +235,6 @@ namespace Tests {
 
         [UnityTest]
         public IEnumerator T03b_TapSpaceBriefly([ValueSource(nameof(JUMP_SPEEDS))] float jumpSpeed, [ValueSource(nameof(JUMP_STOP_SPEEDS))] float jumpStopSpeed) {
-            var keyboard = Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
-
             yield return SpawnMarioOnPlatform();
 
             mario.jumpSpeed = jumpSpeed;
@@ -256,8 +251,6 @@ namespace Tests {
 
         [UnityTest]
         public IEnumerator T03c_PressSpaceWhileAirborne([ValueSource(nameof(JUMP_SPEEDS))] float jumpSpeed, [ValueSource(nameof(JUMP_STOP_SPEEDS))] float jumpStopSpeed) {
-            var keyboard = Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
-
             InstantiateMario(Vector3.up);
             mario.isGrounded = false;
             mario.isJumping = false;

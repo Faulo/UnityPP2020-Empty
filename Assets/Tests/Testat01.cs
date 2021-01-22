@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Tests {
+    [TestFixture]
     public class Testat01 : TestSuite {
         const string UNITY_VERSION = "2019.4.12f1";
         const string GIT_PATH = "./.git";

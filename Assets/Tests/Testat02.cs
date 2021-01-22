@@ -7,11 +7,11 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 using UnityEngine.TestTools;
 
 namespace Tests {
+    [TestFixture]
     public class Testat02 : TestSuite {
         [Serializable]
         public class Move {
@@ -34,10 +34,6 @@ namespace Tests {
         static readonly int[] AVATAR_SPEED_DURATIONS = new[] { 0, 2, 4 };
         static Move[] MOVEMENT_DIRECTIONS {
             get {
-                var keyboard = Keyboard.current;
-                if (keyboard == null) {
-                    keyboard = InputSystem.AddDevice<Keyboard>();
-                }
                 return new[]
                 {
                     new Move {

@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Tests {
+    [TestFixture]
     public class Testat04 : TestSuite {
         class AvatarBridge : GameObjectBridge {
             public bool isGrounded {

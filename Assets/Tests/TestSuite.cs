@@ -11,17 +11,10 @@ using UnityEngine.TestTools;
 
 namespace Tests {
     public class TestSuite {
-        protected readonly InputTestFixture input = new InputTestFixture();
-        [SetUp]
-        void Setup() {
-            input.Setup();
-            InputSystem.settings.updateMode = InputSettings.UpdateMode.ProcessEventsManually;
-        }
+        protected InputTestFixture input = new InputTestFixture();
 
-        [TearDown]
-        void TearDown() {
-            input.TearDown();
-        }
+        protected static Keyboard keyboard => keyboardCache ?? Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
+        static Keyboard keyboardCache;
 
         protected Scene currentScene => loadedScene.IsValid()
             ? loadedScene
@@ -29,12 +22,15 @@ namespace Tests {
         Scene testScene;
         [UnitySetUp]
         public IEnumerator UnitySetUp() {
+            input.Setup();
+            keyboardCache = InputSystem.AddDevice<Keyboard>();
             yield return null;
             testScene = SceneManager.GetActiveScene();
         }
 
         [UnityTearDown]
         public IEnumerator UnityTearDown() {
+            input.TearDown();
             while (loadedObjects.Count > 0) {
                 var obj = loadedObjects[0];
                 loadedObjects.RemoveAt(0);

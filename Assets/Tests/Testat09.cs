@@ -6,6 +6,7 @@ using UnityEngine.TestTools;
 using UnityEngine.TestTools.Utils;
 
 namespace Tests {
+    [TestFixture]
     public class Testat09 : TestSuite {
         class MarioBridge : GameObjectBridge {
             public MarioBridge(GameObject gameObject, bool isInstance = false) : base(gameObject) {

@@ -9,6 +9,7 @@ using UnityEngine.InputSystem.Controls;
 using UnityEngine.TestTools;
 
 namespace Tests {
+    [TestFixture]
     public class Testat03 : TestSuite {
         class AvatarBridge : GameObjectBridge {
             public bool isGrounded {
@@ -82,7 +83,7 @@ namespace Tests {
 
         static readonly float[] AVATAR_SPEED_VALUES = new[] { 0, 5f };
         static readonly int[] AVATAR_SPEED_DURATIONS = new[] { 2, 8 };
-        static KeyControl AVATAR_JUMPKEY => Keyboard.current.spaceKey;
+        static KeyControl AVATAR_JUMPKEY => keyboard.spaceKey;
 
         const string SCENE_PATH = "./Assets/Scenes/PlatformTest.unity";
         const string SCENE_NAME = "PlatformTest";
@@ -91,10 +92,6 @@ namespace Tests {
         const float SCENE_TIMEOUT = 5;
         static Move[] MOVEMENT_DIRECTIONS {
             get {
-                var keyboard = Keyboard.current;
-                if (keyboard == null) {
-                    keyboard = InputSystem.AddDevice<Keyboard>();
-                }
                 return new[]
                 {
                     new Move() {key = keyboard.rightArrowKey, sign = 1 },
