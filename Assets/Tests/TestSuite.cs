@@ -94,5 +94,10 @@ namespace Tests {
                 .SelectMany(obj => obj.GetComponentsInChildren<T>())
                 .ToArray();
         }
+        protected T[] FindNewObjectsInScene<T>(ISet<T> storage) where T : Component {
+            return FindObjectsInScene<T>()
+                .Where(storage.Add)
+                .ToArray();
+        }
     }
 }

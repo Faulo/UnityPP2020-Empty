@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -86,7 +87,7 @@ namespace Tests {
             }
         }
 
-        const float SCENE_TIMEOUT = 1;
+        const float SCENE_TIMEOUT = 2;
         static readonly Vector2[] V2_POSITIONS = new[] { new Vector2(2, 3), new Vector2(-4, 2) };
         static readonly int[] DOUBLE_JUMPS = new[] { 0, 1, 2 };
 
@@ -136,6 +137,7 @@ namespace Tests {
             Assert.IsNotNull(robot.collider, $"{robot} must have a {typeof(BoxCollider2D)} component!");
             Assert.IsNotNull(robot.renderer, $"{robot} must have a {typeof(SpriteRenderer)} component!");
             Assert.IsNotNull(robot.animator, $"{robot} must have a {typeof(Animator)} component!");
+            Assert.IsTrue(robot.rigidbody.freezeRotation, $"{robot}'s rotation must be frozen!");
         }
         [Test]
         public void T02b_AnimatorFileExists([ValueSource(nameof(ANIMATOR_FILES))] string path) {
@@ -193,13 +195,14 @@ namespace Tests {
         }
         [UnityTest]
         public IEnumerator T02e_VerifyRobotJumpingWhenHoldingSpace() {
+            var particles = new HashSet<ParticleSystem>();
             yield return SpawnRobotOnPlatform();
             var key = keyboard.spaceKey;
-            Assert.AreEqual(0, FindObjectsInScene<ParticleSystem>().Length, $"Robot shouldn't have spawned ParticleSystems when landing!");
+            Assert.AreEqual(0, FindNewObjectsInScene(particles).Length, $"Robot shouldn't have spawned ParticleSystems when landing!");
             using (new InputPress(input, key)) {
                 yield return WaitForState("Jumping", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ");
                 Assert.Greater(robot.rigidbody.velocity.y, robot.jumpStartSpeed * 0.75f, $"When jumping, {robot}'s vertical speed should become his '{nameof(robot.jumpStartSpeed)}'!");
-                Assert.LessOrEqual(1, FindObjectsInScene<ParticleSystem>().Length, $"Robot should've spawned a ParticleSystem when jumping!");
+                Assert.LessOrEqual(1, FindNewObjectsInScene(particles).Length, $"Robot should've spawned a ParticleSystem when jumping!");
                 yield return WaitForState("Falling", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ");
                 Assert.Less(robot.rigidbody.velocity.y, robot.jumpStopSpeed, $"When falling, {robot}'s vertical speed should become his '{nameof(robot.jumpStopSpeed)}'!");
                 yield return WaitForState("Idle", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ", 20);
@@ -208,33 +211,36 @@ namespace Tests {
         }
         [UnityTest]
         public IEnumerator T02f_VerifyRobotJumpingWhenTappingSpace() {
+            var particles = new HashSet<ParticleSystem>();
             yield return SpawnRobotOnPlatform();
             var key = keyboard.spaceKey;
-            Assert.AreEqual(0, FindObjectsInScene<ParticleSystem>().Length, $"Robot shouldn't have spawned ParticleSystems when landing!");
+            Assert.AreEqual(0, FindNewObjectsInScene(particles).Length, $"Robot shouldn't have spawned ParticleSystems when landing!");
             using (new InputPress(input, key)) {
                 yield return WaitForState("Jumping", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ");
                 Assert.Greater(robot.rigidbody.velocity.y, robot.jumpStartSpeed * 0.75f, $"When jumping, {robot}'s vertical speed should become his '{nameof(robot.jumpStartSpeed)}'!");
-                Assert.AreEqual(1, FindObjectsInScene<ParticleSystem>().Length, $"Robot should've spawned a ParticleSystem when jumping!");
+                Assert.AreEqual(1, FindNewObjectsInScene(particles).Length, $"Robot should've spawned a ParticleSystem when jumping!");
             }
             yield return WaitForState("Falling", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ");
             Assert.LessOrEqual(robot.rigidbody.velocity.y, robot.jumpStopSpeed, $"When falling, {robot}'s vertical speed should become his '{nameof(robot.jumpStopSpeed)}'!");
             yield return WaitForState("Idle", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ", 20);
         }
+
         [UnityTest]
         public IEnumerator T02g_VerifyRobotDoubleJump([ValueSource(nameof(DOUBLE_JUMPS))] int count) {
+            var particles = new HashSet<ParticleSystem>();
             yield return SpawnRobotOnPlatform();
             robot.doubleJumpCount = count;
             int frameCount = 5;
             var key = keyboard.spaceKey;
             using (new InputPress(input, key)) {
                 yield return WaitForState("Jumping", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ", frameCount);
-                Assert.AreEqual(1, FindObjectsInScene<ParticleSystem>().Length, $"Robot should've spawned a ParticleSystem when jumping!");
+                Assert.AreEqual(1, FindNewObjectsInScene(particles).Length, $"Robot should've spawned a ParticleSystem when jumping!");
             }
             yield return WaitForState("Falling", $"When releasing '{key}' and waiting {SCENE_TIMEOUT}s, ", frameCount);
             for (int i = 0; i < count; i++) {
                 using (new InputPress(input, key)) {
                     yield return WaitForState("Jumping", $"While pressing '{key}' again and waiting {SCENE_TIMEOUT}s, ", frameCount);
-                    Assert.AreEqual(i + 2, FindObjectsInScene<ParticleSystem>().Length, $"Robot should've spawned a ParticleSystem when jumping!");
+                    Assert.AreEqual(1, FindNewObjectsInScene(particles).Length, $"Robot should've spawned a ParticleSystem when jumping!");
                 }
                 yield return WaitForState("Falling", $"When releasing '{key}' and waiting {SCENE_TIMEOUT}s, ", frameCount);
             }
@@ -279,18 +285,23 @@ namespace Tests {
                 Is.EqualTo(velocity).Using(comparer),
                 $"Teleporting should set Robot's velocity to its {nameof(teleporter.ejectVelocity)}!"
             );
-            yield return WaitForState("Falling", $"After getting teleported, ", 30);
+            robot.rigidbody.gravityScale = 1;
+            yield return WaitForState("Falling", $"After getting teleported, ", 10);
+            yield return WaitForState("Idle", $"After getting teleported, ", 30);
         }
         IEnumerator SpawnRobotOnPlatform() {
             InstantiateCamera(new Vector3(0, 5, -10));
             InstantiateRobot(new Vector3(0, 2, 0));
+            robot.rigidbody.gravityScale = 1;
+            robot.rigidbody.mass = 1;
+            robot.rigidbody.drag = 0;
             robot.isCrouching = false;
             robot.isGrounded = false;
             robot.isJumping = false;
             robot.accelerationDuration = 0.1f;
             robot.maximumSpeed = 5;
-            robot.jumpStartSpeed = 4;
-            robot.jumpStopSpeed = 2;
+            robot.jumpStartSpeed = 6;
+            robot.jumpStopSpeed = 3;
             robot.doubleJumpCount = 1;
 
             InstantiatePlatform();
