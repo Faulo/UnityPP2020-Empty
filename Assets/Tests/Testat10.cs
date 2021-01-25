@@ -73,9 +73,9 @@ namespace Tests {
                 get => FindField<Vector2>(nameof(ejectVelocity)).value;
                 set => FindField<Vector2>(nameof(ejectVelocity)).value = value;
             }
-            public ParticleSystem targetParticles => target.GetComponentsInChildren<ParticleSystem>()
-                .FirstOrDefault(particles => particles != teleporterParticles);
-            public ParticleSystem teleporterParticles => gameObject.GetComponent<ParticleSystem>();
+            public ParticleSystem targetParticles => target.GetComponentInChildren<ParticleSystem>();
+            public ParticleSystem teleporterParticles => gameObject.GetComponentsInChildren<ParticleSystem>()
+                .FirstOrDefault(particles => particles != targetParticles);
         }
         [Serializable]
         public class Move {
