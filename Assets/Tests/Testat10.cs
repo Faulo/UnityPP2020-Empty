@@ -228,9 +228,9 @@ namespace Tests {
         [UnityTest]
         public IEnumerator T02g_VerifyRobotDoubleJump([ValueSource(nameof(DOUBLE_JUMPS))] int count) {
             var particles = new HashSet<ParticleSystem>();
-            yield return SpawnRobotOnPlatform();
-            robot.doubleJumpCount = count;
+            yield return SpawnRobotOnPlatform(count);
             int frameCount = 5;
+            yield return WaitForState("Idle", $"After landing on a platform, ", frameCount);
             var key = keyboard.spaceKey;
             using (new InputPress(input, key)) {
                 yield return WaitForState("Jumping", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ", frameCount);
@@ -249,9 +249,9 @@ namespace Tests {
                     Assert.IsTrue(robot.animatorState.IsName("Falling"), $"We used up all our double-jumps, so Robot should've kept falling!");
                     yield return new WaitForFixedUpdate();
                 }
-                yield return WaitForState("Idle", $"After expending all double-jumps waiting {SCENE_TIMEOUT}s, ", 20);
+                yield return WaitForState("Idle", $"After expending all double-jumps waiting {SCENE_TIMEOUT}s, ", frameCount);
             }
-            yield return WaitForState("Idle", $"After expending all double-jumps waiting {SCENE_TIMEOUT}s, ", 20);
+            yield return WaitForState("Idle", $"After expending all double-jumps waiting {SCENE_TIMEOUT}s, ", frameCount);
         }
         [Test]
         public void T03a_VerifyTeleporterPrefab() {
@@ -289,7 +289,7 @@ namespace Tests {
             yield return WaitForState("Falling", $"After getting teleported, ", 10);
             yield return WaitForState("Idle", $"After getting teleported, ", 30);
         }
-        IEnumerator SpawnRobotOnPlatform() {
+        IEnumerator SpawnRobotOnPlatform(int doubleJumpCount = 1) {
             InstantiateCamera(new Vector3(0, 5, -10));
             InstantiateRobot(new Vector3(0, 2, 0));
             robot.rigidbody.gravityScale = 1;
@@ -302,7 +302,7 @@ namespace Tests {
             robot.maximumSpeed = 5;
             robot.jumpStartSpeed = 6;
             robot.jumpStopSpeed = 3;
-            robot.doubleJumpCount = 1;
+            robot.doubleJumpCount = doubleJumpCount;
 
             InstantiatePlatform();
 
