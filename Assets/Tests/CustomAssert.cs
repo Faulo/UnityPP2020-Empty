@@ -18,4 +18,8 @@ public static class CustomAssert {
     public static void AreEqual(Quaternion expected, Quaternion actual, string message) {
         Assert.That(actual, Is.EqualTo(expected).Using(QuaternionEqualityComparer.Instance), message);
     }
+    public static void InBounds(float actual, float expectedMinimum, float expectedMaximum, string message) {
+        Assert.GreaterOrEqual(actual, expectedMinimum, message);
+        Assert.LessOrEqual(actual, expectedMaximum, message);
+    }
 }
