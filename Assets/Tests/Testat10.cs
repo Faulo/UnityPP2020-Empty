@@ -166,14 +166,15 @@ namespace Tests {
             Assert.AreEqual(Vector2.zero, robot.rigidbody.velocity, $"After spawning, {robot}'s velocity should be zero!");
             yield return WaitForState("Idle", "After spawning, ");
             using (new InputPress(input, move.keys)) {
-                float timeout = Time.time + (robot.accelerationDuration / 2);
+                float timeout = Time.time + robot.accelerationDuration;
                 yield return WaitForState(move.sign == 0 ? "Idle" : "Walk", $"While pressing '{move}' and waiting {SCENE_TIMEOUT}s, ");
                 yield return WaitForState(move.sign == 0 ? "Idle" : "Run", $"While pressing '{move}' and waiting {SCENE_TIMEOUT}s, ");
                 if (move.sign != 0) {
                     float mininumSpeed = robot.maximumSpeed * SPEED_BOUNDS_LOWER;
                     float maximumSpeed = robot.maximumSpeed * SPEED_BOUNDS_UPPER;
-                    yield return new WaitUntil(() => Time.time > timeout);
-                    Assert.Less(robot.rigidbody.velocity.x * move.sign, mininumSpeed, $"{robot} should not reach their maximum speed until after his '{nameof(robot.accelerationDuration)}' of {robot.accelerationDuration}s!");
+                    if (Time.time < timeout) {
+                        Assert.Less(robot.rigidbody.velocity.x * move.sign, mininumSpeed, $"{robot} should not reach their maximum speed until after his '{nameof(robot.accelerationDuration)}' of {robot.accelerationDuration}s!");
+                    }
                     Assert.AreEqual(move.sign, Math.Sign(robot.rigidbody.velocity.x), $"While pressing '{move}', {robot}'s direction should be '{move.sign}'!");
                     timeout = Time.time + SCENE_TIMEOUT;
                     yield return new WaitUntil(() => robot.rigidbody.velocity.x * move.sign > mininumSpeed || Time.time > timeout);
@@ -260,9 +261,9 @@ namespace Tests {
                     Assert.IsTrue(robot.animatorState.IsName("Falling"), $"We used up all our double-jumps, so Robot should've kept falling!");
                     yield return new WaitForFixedUpdate();
                 }
-                yield return WaitForState("Idle", $"After expending all double-jumps waiting {SCENE_TIMEOUT}s, ", frameCount);
+                yield return WaitForState("Idle", $"After expending all double-jumps and waiting {SCENE_TIMEOUT}s, ", frameCount);
             }
-            yield return WaitForState("Idle", $"After expending all double-jumps waiting {SCENE_TIMEOUT}s, ", frameCount);
+            yield return WaitForState("Idle", $"After expending all double-jumps and waiting {SCENE_TIMEOUT}s, ", frameCount);
         }
         [Test]
         public void T03a_VerifyTeleporterPrefab() {
@@ -325,13 +326,10 @@ namespace Tests {
         IEnumerator WaitForState(string state, string message, int framesToStayInState = 0) {
             float timeout = Time.time + SCENE_TIMEOUT;
             yield return new WaitUntil(() => robot.animatorState.IsName(state) || Time.time > timeout);
-            while (framesToStayInState >= 0) {
-                Assert.IsTrue(robot.animatorState.IsName(state), $"{message}Robot should've arrived in state {state}, but didn't!");
-                if (framesToStayInState == 0) {
-                    break;
-                }
-                framesToStayInState--;
+            Assert.IsTrue(robot.animatorState.IsName(state), $"{message}Robot should've arrived in state '{state}', but didn't!");
+            for (int i = 0; i < framesToStayInState; i++) {
                 yield return new WaitForFixedUpdate();
+                Assert.IsTrue(robot.animatorState.IsName(state), $"{message}Robot should've stayed in state '{state}' for at least {framesToStayInState} frames, but didn't!");
             }
         }
         RobotBridge LoadRobotPrefab() {
