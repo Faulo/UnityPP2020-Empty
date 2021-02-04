@@ -182,3 +182,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attachedCollider: {fileID: 4226569865540131680}
   attachedRenderer: {fileID: 3405062945401066323}
+  visibleDuration: 1
+  disappearingDuration: 1
+  goneDuration: 0.5
+  appearingDuration: 0.5
