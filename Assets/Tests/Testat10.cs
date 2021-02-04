@@ -173,7 +173,7 @@ namespace Tests {
                     float mininumSpeed = robot.maximumSpeed * SPEED_BOUNDS_LOWER;
                     float maximumSpeed = robot.maximumSpeed * SPEED_BOUNDS_UPPER;
                     if (Time.time < timeout) {
-                        Assert.Less(robot.rigidbody.velocity.x * move.sign, mininumSpeed, $"{robot} should not reach their maximum speed until after his '{nameof(robot.accelerationDuration)}' of {robot.accelerationDuration}s!");
+                        Assert.LessOrEqual(robot.rigidbody.velocity.x * move.sign, mininumSpeed, $"{robot} should not reach their maximum speed until after his '{nameof(robot.accelerationDuration)}' of {robot.accelerationDuration}s!");
                     }
                     Assert.AreEqual(move.sign, Math.Sign(robot.rigidbody.velocity.x), $"While pressing '{move}', {robot}'s direction should be '{move.sign}'!");
                     timeout = Time.time + SCENE_TIMEOUT;
@@ -213,7 +213,7 @@ namespace Tests {
                 Assert.AreEqual(1, FindNewObjectsInScene(particles).Length, $"Robot should've spawned a ParticleSystem when jumping!");
                 yield return WaitForState("Falling", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ");
                 maximumSpeed = robot.jumpStopSpeed * JUMP_BOUNDS_UPPER;
-                Assert.Less(robot.rigidbody.velocity.y, maximumSpeed, $"When falling, {robot}'s vertical speed should become his '{nameof(robot.jumpStopSpeed)}'!");
+                Assert.LessOrEqual(robot.rigidbody.velocity.y, maximumSpeed, $"When falling, {robot}'s vertical speed should become his '{nameof(robot.jumpStopSpeed)}'!");
                 yield return WaitForState("Idle", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ", 20);
             }
             yield return WaitForState("Idle", $"After releasing '{key}'s, ", 20);
@@ -260,7 +260,6 @@ namespace Tests {
                     Assert.IsTrue(robot.animatorState.IsName("Falling"), $"We used up all our double-jumps, so Robot should've kept falling!");
                     yield return new WaitForFixedUpdate();
                 }
-                yield return WaitForState("Idle", $"After expending all double-jumps and waiting {SCENE_TIMEOUT}s, ", frameCount);
             }
             yield return WaitForState("Idle", $"After expending all double-jumps and waiting {SCENE_TIMEOUT}s, ", frameCount);
         }
