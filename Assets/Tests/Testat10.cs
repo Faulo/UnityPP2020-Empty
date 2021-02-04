@@ -212,9 +212,8 @@ namespace Tests {
                 CustomAssert.InBounds(robot.rigidbody.velocity.y, minimumSpeed, maximumSpeed, $"When jumping, {robot}'s vertical speed should become his '{nameof(robot.jumpStartSpeed)}'  of '{robot.jumpStartSpeed}'!");
                 Assert.AreEqual(1, FindNewObjectsInScene(particles).Length, $"Robot should've spawned a ParticleSystem when jumping!");
                 yield return WaitForState("Falling", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ");
-                minimumSpeed = robot.jumpStopSpeed * JUMP_BOUNDS_LOWER;
                 maximumSpeed = robot.jumpStopSpeed * JUMP_BOUNDS_UPPER;
-                CustomAssert.InBounds(robot.rigidbody.velocity.y, minimumSpeed, maximumSpeed, $"When falling, {robot}'s vertical speed should become his '{nameof(robot.jumpStopSpeed)}'!");
+                Assert.Less(robot.rigidbody.velocity.y, maximumSpeed, $"When falling, {robot}'s vertical speed should become his '{nameof(robot.jumpStopSpeed)}'!");
                 yield return WaitForState("Idle", $"While pressing '{key}' and waiting {SCENE_TIMEOUT}s, ", 20);
             }
             yield return WaitForState("Idle", $"After releasing '{key}'s, ", 20);
