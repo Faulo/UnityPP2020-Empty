@@ -11,6 +11,10 @@ namespace Tests {
             get => transform.localScale;
             set => transform.localScale = value;
         }
+        public string tag {
+            get => gameObject.tag;
+            set => gameObject.tag = value;
+        }
         public Transform transform {
             get;
             private set;
@@ -34,6 +38,10 @@ namespace Tests {
         protected T FindComponentInChildren<T>()
             where T : Component {
             return gameObject.GetComponentInChildren<T>();
+        }
+        protected T[] FindComponentsInChildren<T>()
+            where T : Component {
+            return gameObject.GetComponentsInChildren<T>();
         }
         protected T FindInterface<T>()
             where T : class {
