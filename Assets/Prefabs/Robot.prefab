@@ -168,6 +168,11 @@ MonoBehaviour:
       m_Flags: 0
   jumpParticlesPrefab: {fileID: 1749779497471808486, guid: 329d4028b97b9cc4b8da4fd0b6348f45,
     type: 3}
+  coinParticlesPrefab: {fileID: 1749779497471808486, guid: 30f5f7b01b693164ca74fdd7e7d91f69,
+    type: 3}
+  currentCoinCount: 0
+  maximumCoinCount: 0
+  deathCount: 0
 --- !u!1 &5968904622557830971
 GameObject:
   m_ObjectHideFlags: 0
