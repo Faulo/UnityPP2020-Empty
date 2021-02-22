@@ -31,6 +31,9 @@ namespace Tests {
         protected MethodBridge<T> FindMethod<T>(string name, int parameterCount, string returnType) {
             return new MethodBridge<T>(gameObject, name, parameterCount, returnType);
         }
+        protected MethodBridge FindMethod(string name, int parameterCount) {
+            return new MethodBridge(gameObject, name, parameterCount);
+        }
         protected T FindComponent<T>()
             where T : Component {
             return gameObject.GetComponent<T>();
