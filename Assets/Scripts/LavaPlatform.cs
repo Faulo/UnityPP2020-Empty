@@ -1,20 +1,21 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class LavaPlatform : MonoBehaviour {
+public class LavaPlatform : MonoBehaviour
+{
     [SerializeField]
-    ParticleSystem particlePrefab = default;
+    private ParticleSystem particlePrefab = default;
     [SerializeField]
-    float deathDuration = 1;
+    private float deathDuration = 1;
     [SerializeField]
-    float respawnDuration = 1;
+    private float respawnDuration = 1;
+    private RobotController avatar;
+    private Vector3 startPosition;
+    private CameraController avatarCamera;
+    private float startDuration;
 
-    RobotController avatar;
-    Vector3 startPosition;
-    CameraController avatarCamera;
-    float startDuration;
-
-    void Start() {
+    private void Start()
+    {
         avatar = FindObjectOfType<RobotController>();
         startPosition = avatar.transform.position;
 
@@ -22,12 +23,16 @@ public class LavaPlatform : MonoBehaviour {
         startDuration = avatarCamera.moveDuration;
     }
 
-    void OnCollisionEnter2D(Collision2D collision) {
-        if (CalculateContact(collision, out var position)) {
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (CalculateContact(collision, out Vector2 position))
+        {
             StartCoroutine(Death(position));
         }
     }
-    IEnumerator Death(Vector2 position) {
+
+    private IEnumerator Death(Vector2 position)
+    {
         // An der Kontaktstelle wird eine Partikelexplosion erzeugt.
         Instantiate(particlePrefab, position, Quaternion.identity);
 
@@ -52,20 +57,26 @@ public class LavaPlatform : MonoBehaviour {
         // Die moveDuration der Kamera wird wieder auf den Wert gesetzt, den sie zu Szenenbeginn besaß. (Das ist auch der Wert, den die moveDuration zum Zeitpunkt v.hatte)
         avatarCamera.moveDuration = startDuration;
     }
-    bool CalculateContact(Collision2D collision, out Vector2 contactPosition) {
+
+    private bool CalculateContact(Collision2D collision, out Vector2 contactPosition)
+    {
         // let's iterate over all contact points to calculate their average
-        var contactPositionSum = Vector2.zero;
+        Vector2 contactPositionSum = Vector2.zero;
         int contactPositionCount = 0;
-        for (int i = 0; i < collision.contactCount; i++) {
-            var contact = collision.GetContact(i);
+        for (int i = 0; i < collision.contactCount; i++)
+        {
+            ContactPoint2D contact = collision.GetContact(i);
             contactPositionSum += contact.point;
             contactPositionCount++;
         }
-        if (contactPositionCount > 0) {
+        if (contactPositionCount > 0)
+        {
             // calculate the average
             contactPosition = contactPositionSum / contactPositionCount;
             return true;
-        } else {
+        }
+        else
+        {
             contactPosition = Vector2.zero;
             return false;
         }

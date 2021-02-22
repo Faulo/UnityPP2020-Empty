@@ -1,19 +1,21 @@
 ﻿using TMPro;
 using UnityEngine;
 
-public class HUDController : MonoBehaviour {
+public class HUDController : MonoBehaviour
+{
     [SerializeField]
-    TextMeshProUGUI coinText = default;
+    private TextMeshProUGUI coinText = default;
     [SerializeField]
-    TextMeshProUGUI deathText = default;
+    private TextMeshProUGUI deathText = default;
+    private RobotController avatar;
 
-    RobotController avatar;
-
-    void Start() {
+    private void Start()
+    {
         avatar = FindObjectOfType<RobotController>();
     }
 
-    void Update() {
+    private void Update()
+    {
         coinText.text = $"Coins collected: {avatar.currentCoinCount}/{avatar.maximumCoinCount}";
         deathText.text = $"Deaths: {avatar.deathCount}";
     }
