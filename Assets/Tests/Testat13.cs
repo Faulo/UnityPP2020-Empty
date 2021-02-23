@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -38,9 +39,9 @@ namespace Tests {
                 get => FindField<string>(nameof(creditsScene)).value;
                 set => FindField<string>(nameof(creditsScene)).value = value;
             }
-            public string[] levelScenes {
-                get => FindField<string[]>(nameof(levelScenes)).value;
-                set => FindField<string[]>(nameof(levelScenes)).value = value;
+            public IEnumerable<string> levelScenes {
+                get => FindField<IEnumerable<string>>(nameof(levelScenes)).value;
+                set => FindField<IEnumerable<string>>(nameof(levelScenes)).value = value;
             }
         }
 
@@ -63,7 +64,7 @@ namespace Tests {
             Assert.IsNotNull(manager.mainMenuScene, $"'mainMenuScene' must not be null!");
             Assert.IsNotNull(manager.creditsScene, $"'creditsScene' must not be null!");
             Assert.IsNotNull(manager.levelScenes, $"'levelScenes' must not be null!");
-            Assert.AreEqual(2, manager.levelScenes.Length, $"'levelScenes' must contain exactly 2 scenes!");
+            Assert.AreEqual(2, manager.levelScenes.Count(), $"'levelScenes' must contain exactly 2 scenes!");
         }
         [Test]
         public void T03a_VerifyMainMenuSceneExists() {
@@ -78,7 +79,7 @@ namespace Tests {
         [Test]
         public void T06a_VerifyLevel2SceneExists() {
             FileAssert.Exists($"./Assets/Scenes/{SCENE_LEVEL_2}.unity");
-            Assert.AreEqual(SCENE_LEVEL_2, LoadLevelManager().levelScenes[1]);
+            Assert.AreEqual(SCENE_LEVEL_2, LoadLevelManager().levelScenes.ElementAt(1));
         }
         [UnityTest]
         public IEnumerator T03b_VerifyMainMenuSceneContainsStuff() {
